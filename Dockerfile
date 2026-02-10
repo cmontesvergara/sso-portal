@@ -1,5 +1,5 @@
 # Etapa 1: Construcción
-FROM node:20 AS build
+FROM public.ecr.aws/docker/library/node:20 AS build
 
 # Establecer directorio de trabajo
 WORKDIR /app
@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build -- --configuration production
 
 # Etapa 2: Configuración del servidor
-FROM nginx:stable-alpine
+FROM public.ecr.aws/nginx/nginx:stable-alpine
 
 # Eliminar configuración predeterminada de NGINX
 RUN rm -rf /usr/share/nginx/html/*
