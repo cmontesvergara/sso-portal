@@ -3,10 +3,10 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import {
-    ApiResponse,
-    Application,
-    CreateApplicationDto,
-    UpdateApplicationDto,
+  ApiResponse,
+  Application,
+  CreateApplicationDto,
+  UpdateApplicationDto,
 } from '../models';
 
 @Injectable({
@@ -15,7 +15,7 @@ import {
 export class ApplicationManagementService {
   private baseUrl = environment.baseUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * Get all applications (system admin only)
@@ -87,6 +87,17 @@ export class ApplicationManagementService {
   ): Observable<{ success: boolean; application: Application }> {
     return this.http.get<{ success: boolean; application: Application }>(
       `${this.baseUrl}/api/v1/applications/by-app-id/${appId}`,
+      { withCredentials: true },
+    );
+  }
+
+  /**
+   * Sync resources for an application
+   */
+  syncResources(appId: string): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/api/v1/applications/${appId}/sync-resources`,
+      {},
       { withCredentials: true },
     );
   }

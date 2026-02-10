@@ -220,8 +220,24 @@ export class ApplicationsComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error toggling app status:', err);
-          alert('Error al cambiar estado');
+          alert('Error al cambiar estado: ' + (err.error?.message || 'Error desconocido'));
         },
       });
+  }
+
+  syncResources(app: Application) {
+    if (!confirm(`¿Estás seguro de sincronizar los recursos para ${app.name}?`)) return;
+
+    // Optional: Add loading state for the specific row or global
+    this.appManagementService.syncResources(app.appId).subscribe({
+      next: (res) => {
+        const count = res.data?.count ?? 0;
+        alert(`Sincronización exitosa. ${count} recursos actualizados.`);
+      },
+      error: (err) => {
+        console.error('Error syncing resources:', err);
+        alert('Error al sincronizar recursos: ' + (err.error?.message || 'Error desconocido'));
+      },
+    });
   }
 }
