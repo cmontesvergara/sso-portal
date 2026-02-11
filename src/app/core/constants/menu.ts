@@ -3,10 +3,21 @@ import { MenuItem } from '../models/menu.model';
 export class Menu {
   public static pages: MenuItem[] = [
     {
-      group: 'Base',
+      group: 'Modulos',
       separator: false,
       hidden: false,
       items: [
+        {
+          hidden: false,
+          icon: 'assets/icons/heroicons/outline/wrench-screwdriver.svg',
+          label: 'Administración',
+          route: '/dashboard',
+          children: [
+            { label: 'Aplicaciones', route: '/dashboard/applications', hidden: false },
+            { label: 'Organizaciones', route: '/dashboard/tenants', hidden: false },
+            { label: 'Roles', route: '/dashboard/roles', hidden: false },
+          ],
+        },
         {
           hidden: false,
           icon: 'assets/icons/heroicons/outline/chart-pie.svg',
@@ -98,7 +109,7 @@ export class Menu {
     {
       group: 'Administración',
       separator: true,
-      hidden: false,
+      hidden: true,
       items: [
         {
           hidden: false,
@@ -106,9 +117,9 @@ export class Menu {
           label: 'Administración',
           route: '/dashboard',
           children: [
-            { label: 'Aplicaciones', route: '/dashboard/applications', icon: 'assets/icons/heroicons/outline/rectangle-group.svg', hidden: false },
-            { label: 'Organizaciones', route: '/dashboard/tenants', icon: 'assets/icons/heroicons/outline/building-office-2.svg', hidden: false },
-            { label: 'Roles', route: '/dashboard/roles', icon: 'assets/icons/heroicons/outline/user-group.svg', hidden: false },
+            { label: 'Aplicaciones', route: '/dashboard/applications', hidden: false },
+            { label: 'Organizaciones', route: '/dashboard/tenants', hidden: false },
+            { label: 'Roles', route: '/dashboard/roles', hidden: false },
           ],
         },
       ],
