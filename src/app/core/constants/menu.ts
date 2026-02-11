@@ -15,7 +15,6 @@ export class Menu {
           children: [
             { label: 'Aplicaciones', route: '/dashboard/applications', hidden: false },
             { label: 'Organizaciones', route: '/dashboard/tenants', hidden: false },
-            { label: 'Roles', route: '/dashboard/roles', hidden: false },
           ],
         },
         {
@@ -24,7 +23,8 @@ export class Menu {
           label: 'Dashboard',
           route: '/dashboard',
           children: [
-            { label: 'Nfts', route: '/dashboard/nfts' },
+            { label: 'Servicios', route: '/dashboard/home' },
+            { label: 'Nfts', route: '/dashboard/nfts', hidden: true },
             { label: 'Podcast', route: '/dashboard/podcast', hidden: true },
           ],
         },
@@ -39,6 +39,7 @@ export class Menu {
           ],
         },
         {
+          hidden: true,
           icon: 'assets/icons/heroicons/outline/user.svg',
           label: 'Perfil',
           route: '/profile',

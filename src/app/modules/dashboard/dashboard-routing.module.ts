@@ -8,6 +8,7 @@ import { NftComponent } from './pages/nft/nft.component';
 import { RolesComponent } from './pages/roles/roles.component';
 import { TenantSelectorComponent } from './pages/tenant-selector/tenant-selector.component';
 import { TenantsComponent } from './pages/tenants/tenants.component';
+import { isLoggedGuard } from 'src/app/core/guards/is-logged/is-logged.guard';
 
 const routes: Routes = [
   {
@@ -15,7 +16,7 @@ const routes: Routes = [
     component: DashboardComponent,
 
     children: [
-      { path: '', redirectTo: 'nfts', pathMatch: 'full' },
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
       { path: 'nfts', component: NftComponent },
       {
         path: 'applications',
@@ -44,7 +45,7 @@ const routes: Routes = [
       },
       {
         path: 'profile',
-        // canActivate: [isLoggedGuard],
+        canActivate: [isLoggedGuard],
         loadChildren: () =>
           import('../profile/profile.module').then((m) => m.ProfileModule),
       },

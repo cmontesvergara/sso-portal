@@ -1,99 +1,25 @@
 import { CommonModule, NgFor, NgIf } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { SystemRole } from 'src/app/core/models';
-import {
-  AuthService,
-  TenantWithApps,
-  UserProfile,
-} from 'src/app/core/services/auth/auth.service';
+import { Component } from '@angular/core';
+import { ConnectedServicesCardComponent } from '../../components/nft/connected-services-card/connected-services-card.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, NgIf, NgFor],
+  imports: [CommonModule, NgIf, NgFor, ConnectedServicesCardComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent implements OnInit {
-  user: UserProfile | null = null;
-  tenants: TenantWithApps[] = [];
-  loading = true;
-  error: string | null = null;
+export class HomeComponent {
 
-  constructor(private authService: AuthService, private router: Router) { }
 
-  async ngOnInit() {
-    try {
-      await this.loadUserData();
-      await this.loadTenants();
-    } catch (error: any) {
-      this.error = error.message || 'Error al cargar datos';
-    } finally {
-      this.loading = false;
-    }
-  }
+  constructor() { }
 
-  async loadUserData() {
-    this.authService.getProfile().subscribe({
-      next: (response) => {
-        this.user = response.user;
-      },
-      error: (err) => {
-        console.error('Error loading profile:', err);
-        throw err;
-      },
-    });
-  }
 
-  async loadTenants() {
-    this.authService.getUserTenants().subscribe({
-      next: (response) => {
-        this.tenants = response.tenants;
-      },
-      error: (err) => {
-        console.error('Error loading tenants:', err);
-        throw err;
-      },
-    });
-  }
 
-  async launchApp(tenantId: string, appId: string, appUrl: string) {
-    try {
-      const redirectUri = `${appUrl}/auth/callback`;
 
-      this.authService.authorize(tenantId, appId, redirectUri).subscribe({
-        next: (response) => {
-          // Redirect to app with auth code
-          window.location.href = response.redirectUri;
-        },
-        error: (err) => {
-          console.error('Error launching app:', err);
-          alert('Error al lanzar aplicación');
-        },
-      });
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Error al lanzar aplicación');
-    }
-  }
 
-  goToProfile() {
-    this.router.navigate(['/profile']);
-  }
 
-  goToSecurity() {
-    this.router.navigate(['/security']);
-  }
 
-  goToAdmin() {
-    this.router.navigate(['/admin']);
-  }
 
-  isSystemAdmin(): boolean {
-    return (
-      this.user?.systemRole === SystemRole.SYSTEM_ADMIN ||
-      this.user?.systemRole === SystemRole.SUPER_ADMIN
-    );
-  }
+
 }
