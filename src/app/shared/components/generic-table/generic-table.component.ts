@@ -3,11 +3,12 @@ import { Component, Input, OnInit, OnChanges, SimpleChanges, TemplateRef } from 
 import { FormsModule } from '@angular/forms';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { TableColumn } from './models/table-column.model';
+import { OverlayModule } from '@angular/cdk/overlay';
 
 @Component({
     selector: 'app-generic-table',
     standalone: true,
-    imports: [CommonModule, AngularSvgIconModule, FormsModule],
+    imports: [CommonModule, AngularSvgIconModule, FormsModule, OverlayModule],
     templateUrl: './generic-table.component.html',
     styleUrl: './generic-table.component.scss',
 })
