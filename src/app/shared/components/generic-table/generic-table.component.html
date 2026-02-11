@@ -60,7 +60,8 @@
                                 <!-- Actions Column Type -->
                                 <ng-container *ngSwitchCase="'actions'">
                                     <div class="relative flex justify-end pr-4">
-                                        <button (click)="toggleActionMenu(row, $event)"
+                                        <button (click)="toggleActionMenu(row, $event)" cdkOverlayOrigin
+                                            #trigger="cdkOverlayOrigin"
                                             class="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-gray-100 hover:text-foreground transition">
                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -68,21 +69,23 @@
                                             </svg>
                                         </button>
 
-                                        <!-- Dropdown Menu -->
-                                        <div *ngIf="isMenuOpen(row)"
-                                            class="absolute right-0 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
-                                            [ngClass]="(paginatedData.length > 3 && i >= paginatedData.length - 2) ? 'bottom-full mb-1 origin-bottom-right' : 'mt-8 origin-top-right'">
-                                            <div class="py-1" role="menu" aria-orientation="vertical">
-                                                <!-- Content provided by template -->
-                                                <ng-container
-                                                    *ngTemplateOutlet="col.template!; context: { $implicit: row, close: closeActionMenu.bind(this) }">
-                                                </ng-container>
+                                        <!-- Dropdown Menu with CDK Overlay -->
+                                        <ng-template cdkConnectedOverlay [cdkConnectedOverlayOrigin]="trigger"
+                                            [cdkConnectedOverlayOpen]="isMenuOpen(row)"
+                                            [cdkConnectedOverlayHasBackdrop]="true" (backdropClick)="closeActionMenu()"
+                                            [cdkConnectedOverlayPositions]="[
+                                                {originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top'},
+                                                {originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom'}
+                                            ]">
+                                            <div
+                                                class="w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                                                <div class="py-1" role="menu" aria-orientation="vertical">
+                                                    <ng-container
+                                                        *ngTemplateOutlet="col.template!; context: { $implicit: row, close: closeActionMenu.bind(this) }">
+                                                    </ng-container>
+                                                </div>
                                             </div>
-                                        </div>
-
-                                        <!-- Backdrop -->
-                                        <div *ngIf="isMenuOpen(row)" (click)="closeActionMenu()"
-                                            class="fixed inset-0 z-40 bg-transparent cursor-default"></div>
+                                        </ng-template>
                                     </div>
                                 </ng-container>
 
