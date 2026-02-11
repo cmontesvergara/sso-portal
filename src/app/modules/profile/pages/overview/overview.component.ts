@@ -1,11 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  AuthService,
-  TenantWithApps,
-} from 'src/app/core/services/auth/auth.service';
+import { AuthService } from 'src/app/core/services/auth/auth.service';
 import { LoadingService } from 'src/app/core/services/loading/loading.service';
+import { UserProfile } from 'src/app/core/models';
 
 import { ProfileHeaderComponent } from '../../components/profile/profile-header/profile-header.component';
 import { ProfilePersonalInformationComponent } from '../../components/profile/profile-personal-information/profile-personal-information.component';
@@ -26,9 +24,6 @@ import { UserBasicInformation } from '../../models/user-basic-information';
 })
 export class OverviewComponent implements OnInit {
   userBasicInformation: UserBasicInformation = <UserBasicInformation>{};
-  tenants: TenantWithApps[] = [];
-  totalApps = 0;
-  loadingTenants = true;
 
   constructor(
     private loadingService: LoadingService,
@@ -40,12 +35,11 @@ export class OverviewComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUserProfile();
-    this.loadTenants();
   }
 
   loadUserProfile() {
     this.authService.getProfile().subscribe({
-      next: (response) => {
+      next: (response: { success: boolean; user: UserProfile }) => {
         if (response.success && response.user) {
           const user = response.user;
           const firstAddress = user.addresses?.[0];
@@ -81,44 +75,10 @@ export class OverviewComponent implements OnInit {
         }
         this.loadingService.update(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error loading profile:', err);
         this.loadingService.update(false);
       },
     });
-  }
-
-  loadTenants() {
-    this.authService.getUserTenants().subscribe({
-      next: (response) => {
-        this.tenants = response.tenants;
-        this.totalApps = this.tenants.reduce(
-          (acc, tenant) => acc + tenant.apps.length,
-          0,
-        );
-        this.loadingTenants = false;
-      },
-      error: (err) => {
-        console.error('Error loading tenants:', err);
-        this.loadingTenants = false;
-      },
-    });
-  }
-
-  launchApp(tenantId: string, appId: string, appUrl: string) {
-    const redirectUri = `${appUrl}/auth/callback`;
-    this.authService.authorize(tenantId, appId, redirectUri).subscribe({
-      next: (response) => {
-        window.location.href = response.redirectUri;
-      },
-      error: (err) => {
-        console.error('Error launching app:', err);
-        alert('Error al lanzar aplicación');
-      },
-    });
-  }
-
-  viewAllApps() {
-    this.router.navigate(['/sso-dashboard']);
   }
 }

@@ -6,17 +6,20 @@ import { NftSingleCardComponent } from '../../components/nft/nft-single-card/nft
 import { NftDualCardComponent } from '../../components/nft/nft-dual-card/nft-dual-card.component';
 import { NftHeaderComponent } from '../../components/nft/nft-header/nft-header.component';
 
+import { ConnectedServicesCardComponent } from '../../components/nft/connected-services-card/connected-services-card.component';
+
 @Component({
-    selector: 'app-nft',
-    templateUrl: './nft.component.html',
-    standalone: true,
-    imports: [
-        NftHeaderComponent,
-        NftDualCardComponent,
-        NftSingleCardComponent,
-        NftChartCardComponent,
-        NftAuctionsTableComponent,
-    ],
+  selector: 'app-nft',
+  templateUrl: './nft.component.html',
+  standalone: true,
+  imports: [
+    NftHeaderComponent,
+    NftDualCardComponent,
+    NftSingleCardComponent,
+    NftChartCardComponent,
+    NftAuctionsTableComponent,
+    ConnectedServicesCardComponent,
+  ],
 })
 export class NftComponent implements OnInit {
   nft: Array<Nft>;
@@ -51,5 +54,5 @@ export class NftComponent implements OnInit {
     ];
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 }
