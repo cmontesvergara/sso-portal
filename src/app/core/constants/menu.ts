@@ -94,25 +94,22 @@ export class Menu {
         },
       ],
     },
+
     {
       group: 'Administración',
       separator: true,
       hidden: false,
       items: [
         {
-          label: 'Aplicaciones',
-          icon: 'assets/icons/heroicons/outline/cube.svg',
-          route: '/dashboard/applications',
-        },
-        {
-          label: 'Organizaciones',
-          icon: 'assets/icons/heroicons/outline/office-building.svg',
-          route: '/dashboard/tenants',
-        },
-        {
-          label: 'Roles',
-          icon: 'assets/icons/heroicons/outline/user-group.svg',
-          route: '/dashboard/roles',
+          hidden: false,
+          icon: 'assets/icons/heroicons/outline/wrench-screwdriver.svg',
+          label: 'Administración',
+          route: '/dashboard',
+          children: [
+            { label: 'Aplicaciones', route: '/dashboard/applications', icon: 'assets/icons/heroicons/outline/rectangle-group.svg', hidden: false },
+            { label: 'Organizaciones', route: '/dashboard/tenants', icon: 'assets/icons/heroicons/outline/building-office-2.svg', hidden: false },
+            { label: 'Roles', route: '/dashboard/roles', icon: 'assets/icons/heroicons/outline/user-group.svg', hidden: false },
+          ],
         },
       ],
     },
