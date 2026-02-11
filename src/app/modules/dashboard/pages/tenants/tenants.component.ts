@@ -448,6 +448,7 @@ export class TenantsComponent implements OnInit {
 
   closeCreateModal() {
     this.showCreateModal = false;
+    this.error = null;
   }
 
   openMemberModal(tenant: Tenant) {
@@ -460,6 +461,7 @@ export class TenantsComponent implements OnInit {
     this.showMemberModal = false;
     this.selectedTenant = null;
     this.tenantMembers = [];
+    this.error = null;
   }
 
   openInviteModal() {
@@ -474,6 +476,7 @@ export class TenantsComponent implements OnInit {
 
   closeInviteModal() {
     this.showInviteModal = false;
+    this.error = null;
   }
 
   openRoleModal(member: TenantMember) {
@@ -514,6 +517,7 @@ export class TenantsComponent implements OnInit {
   closeRoleModal() {
     this.showRoleModal = false;
     this.selectedMember = null;
+    this.error = null;
   }
 
   openDeleteModal(member: TenantMember) {
@@ -526,6 +530,7 @@ export class TenantsComponent implements OnInit {
   closeDeleteModal() {
     this.showDeleteModal = false;
     this.selectedMember = null;
+    this.error = null;
   }
 
   // CRUD operations

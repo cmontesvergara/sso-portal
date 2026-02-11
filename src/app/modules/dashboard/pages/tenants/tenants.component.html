@@ -14,7 +14,7 @@
     </div>
 
     <!-- Tenants List -->
-    <div *ngIf="!loading && !error">
+    <div *ngIf="!loading">
       <app-generic-table [data]="tenants" [columns]="tableColumns" [loading]="loading" title="Listado de Organizaciones"
         subtitle="Organizaciones registradas" [headerActions]="headerButtons">
       </app-generic-table>
