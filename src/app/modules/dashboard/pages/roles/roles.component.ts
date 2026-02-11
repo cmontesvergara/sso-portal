@@ -9,6 +9,7 @@ import {
   CreateRoleDto,
   CustomRole,
   Permission,
+  SystemRole,
   Tenant,
   TenantRole,
   UserProfile,
@@ -158,6 +159,9 @@ export class RolesComponent implements OnInit {
 
   // Permission checks
   canManageRoles(): boolean {
+    if (this.user?.systemRole === SystemRole.SUPER_ADMIN || this.user?.systemRole === SystemRole.SYSTEM_ADMIN) {
+      return true;
+    }
     return this.tenant?.role === TenantRole.ADMIN;
   }
 
