@@ -24,8 +24,8 @@ export class MenuService implements OnDestroy {
         if (response.success && response.user) {
           const role = response.user.systemRole;
           if (
-            role === SystemRole.SYSTEM_ADMIN ||
-            role === SystemRole.SUPER_ADMIN
+            role !== SystemRole.SYSTEM_ADMIN &&
+            role !== SystemRole.SUPER_ADMIN
           ) {
             const menu = JSON.parse(JSON.stringify(Menu.pages));
             menu.forEach((group: MenuItem) => {
