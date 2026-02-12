@@ -1,6 +1,7 @@
 # Etapa 1: Construcción
 FROM public.ecr.aws/docker/library/node:20 AS build
-
+# Build argument to bust cache
+ARG CACHEBUST=1
 # Establecer directorio de trabajo
 WORKDIR /app
 
