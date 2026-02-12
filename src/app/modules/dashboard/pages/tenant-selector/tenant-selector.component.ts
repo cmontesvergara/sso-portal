@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { UserService } from 'src/app/core/services/user/user.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   AuthService,
@@ -23,7 +22,6 @@ export class TenantSelectorComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private userService: UserService,
     private route: ActivatedRoute,
     private router: Router,
   ) { }
@@ -43,7 +41,7 @@ export class TenantSelectorComponent implements OnInit {
   }
 
   loadTenants() {
-    this.userService.getUserTenants().subscribe({
+    this.authService.getUserTenants().subscribe({
       next: (response) => {
         // Filter tenants by app access
         if (this.appId) {
