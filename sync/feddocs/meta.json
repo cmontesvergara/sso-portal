@@ -1,0 +1,11 @@
+{
+    "name": "SSO PORTAL",
+    "description": "Frontend for sso bigso",
+    "project": "sso-portal",
+    "ownerTeam": "core-team",
+    "techLead": "alfred@bigso.co",
+    "supportChannel": "#core-team",
+    "lifecycle": "active",
+    "version": "1.0.0",
+    "lastReviewed": "2026-02-15"
+}
