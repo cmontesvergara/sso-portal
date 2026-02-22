@@ -207,162 +207,126 @@
 <!-- Permissions Modal -->
 <div *ngIf="showPermissionsModal"
   class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-  <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+  <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] flex flex-col">
     <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
       <div>
         <h3 class="text-lg font-semibold text-gray-900">Permisos de {{ selectedRole?.name }}</h3>
-        <p class="text-sm text-gray-600 mt-1">{{ permissions.length }} permisos</p>
-      </div>
-      <button *ngIf="canManageRoles() && !isDefaultRole(selectedRole?.name || '')" (click)="openAddPermissionModal()"
-        class="flex-none rounded-md bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-        Agregar Permiso
-      </button>
-    </div>
-
-    <div class="flex-1 overflow-y-auto p-6">
-      <div *ngIf="loadingPermissions" class="flex justify-center items-center h-32">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-      </div>
-
-      <div *ngIf="!loadingPermissions" class="space-y-2">
-        <div *ngFor="let permission of permissions"
-          class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-          <div class="flex-1">
-            <div class="flex items-center gap-2 mb-1">
-              <span class="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded">
-                {{ permission.applicationName }}
-              </span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-sm font-medium text-gray-900">{{ permission.resource }}</span>
-              <span class="text-gray-400">:</span>
-              <span class="text-sm font-medium text-primary-600">{{ permission.action }}</span>
-            </div>
-            <div class="text-xs text-gray-500 mt-1">
-              Creado: {{ permission.createdAt | date: 'dd/MM/yyyy HH:mm' }}
-            </div>
-          </div>
-          <div *ngIf="canManageRoles() && !isDefaultRole(selectedRole?.name || '')">
-            <button (click)="openDeletePermissionModal(permission)" class="text-red-600 hover:text-red-900 text-sm">
-              Eliminar
-            </button>
-          </div>
-        </div>
-        <div *ngIf="permissions.length === 0" class="text-center py-8 text-gray-500">
-          No hay permisos asignados a este rol
-        </div>
+        <p class="text-sm text-gray-600 mt-1">Selecciona una aplicación para ver y gestionar sus permisos</p>
       </div>
     </div>
 
-    <div class="px-6 py-4 border-t border-gray-200">
+    <!-- Modal Body -->
+    <div class="flex-1 overflow-y-auto p-6 bg-gray-50 flex flex-col md:flex-row gap-6">
+      <div *ngIf="loadingPermissions"
+        class="absolute inset-0 bg-white bg-opacity-70 flex justify-center items-center z-10">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div>
+      </div>
+
+      <!-- Left Column: App Selector -->
+      <div class="w-full md:w-1/3 flex flex-col gap-4">
+        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Aplicación</label>
+          <select [(ngModel)]="selectedAppId" (ngModelChange)="onAppSelectionChange()"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+            <option value="">Selecciona una aplicación</option>
+            <option *ngFor="let app of availableApplications" [value]="app.appId">
+              {{ app.name }}
+            </option>
+          </select>
+        </div>
+
+        <div *ngIf="error" class="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-800">
+          {{ error }}
+        </div>
+        <div *ngIf="success" class="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800">
+          {{ success }}
+        </div>
+      </div>
+
+      <!-- Right Column: Permissions Tree -->
+      <div class="w-full md:w-2/3">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 h-full overflow-hidden flex flex-col">
+          <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+            <span class="font-medium text-gray-900">Privilegios</span>
+            <span *ngIf="selectedAppId && groupedResources.length === 0" class="text-xs text-gray-500">Sin recursos
+              disponibles</span>
+          </div>
+
+          <div class="flex-1 overflow-y-auto p-4">
+            <div *ngIf="!selectedAppId"
+              class="h-full flex flex-col items-center justify-center text-center text-gray-500 py-12">
+              <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                </path>
+              </svg>
+              <p>Selecciona una aplicación para gestionar sus permisos</p>
+            </div>
+
+            <div *ngIf="selectedAppId && groupedResources.length > 0" class="space-y-6">
+              <div *ngFor="let group of groupedResources" class="border border-gray-100 rounded-lg overflow-hidden">
+                <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                    </svg>
+                    <span class="font-semibold text-gray-900 capitalize">{{ group.resource }}</span>
+                  </div>
+                  <label class="flex items-center gap-2 cursor-pointer"
+                    *ngIf="canManageRoles() && !isDefaultRole(selectedRole?.name || '')">
+                    <span class="text-xs text-gray-500">Seleccionar todos</span>
+                    <input type="checkbox"
+                      class="rounded border-gray-300 text-primary-600 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50"
+                      [checked]="areAllSelected(group)"
+                      (change)="selectAllForResource(group, $any($event.target).checked)">
+                  </label>
+                </div>
+
+                <div class="p-4 bg-white">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-4">
+                    <div *ngFor="let actionItem of group.actions" class="flex items-center">
+                      <label
+                        class="flex items-center justify-start gap-2 max-w-full px-2 py-1.5 rounded hover:bg-gray-50 flex-1 transition-colors"
+                        [class.cursor-pointer]="canManageRoles() && !isDefaultRole(selectedRole?.name || '')"
+                        [class.cursor-not-allowed]="!canManageRoles() || isDefaultRole(selectedRole?.name || '')"
+                        [class.opacity-70]="!canManageRoles() || isDefaultRole(selectedRole?.name || '')">
+                        <input type="checkbox" [disabled]="!canManageRoles() || isDefaultRole(selectedRole?.name || '')"
+                          [checked]="actionItem.hasPermission" (change)="togglePermission(actionItem)"
+                          class="rounded border-gray-300 text-primary-600 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50">
+                        <span class="text-sm text-gray-700 capitalize break-words">{{ actionItem.action }}</span>
+                        <!-- Indicator for unsaved changed state -->
+                        <span *ngIf="actionItem.hasPermission !== actionItem.originalState"
+                          class="w-2 h-2 rounded-full flex-none"
+                          [ngClass]="actionItem.hasPermission ? 'bg-green-500' : 'bg-red-500'"
+                          title="Cambio sin guardar"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 border-t border-gray-200 bg-white flex justify-end gap-3 rounded-b-lg">
       <button (click)="closePermissionsModal()"
-        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
         Cerrar
       </button>
-    </div>
-  </div>
-</div>
-
-<!-- Add Permission Modal -->
-<div *ngIf="showAddPermissionModal"
-  class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-[60] flex items-center justify-center">
-  <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-900">Agregar Permiso</h3>
-    </div>
-    <div class="p-6">
-      <form (ngSubmit)="addPermission()">
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Aplicación *</label>
-            <select [(ngModel)]="addPermissionForm.applicationId" (ngModelChange)="onApplicationChange()"
-              name="applicationId" required
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-              <option value="">Selecciona una aplicación</option>
-              <option *ngFor="let app of availableApplications" [value]="app.appId">
-                {{ app.name }}
-              </option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Recurso *</label>
-            <select [(ngModel)]="addPermissionForm.resource" (ngModelChange)="onResourceChange()" name="resource"
-              required [disabled]="!addPermissionForm.applicationId"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100">
-              <option value="">Selecciona un recurso</option>
-              <option *ngFor="let resource of filteredResources" [value]="resource">
-                {{ resource }}
-              </option>
-            </select>
-            <p *ngIf="!addPermissionForm.applicationId" class="mt-1 text-xs text-gray-500">
-              Primero selecciona una aplicación
-            </p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Acción *</label>
-            <select [(ngModel)]="addPermissionForm.action" name="action" required
-              [disabled]="!addPermissionForm.resource"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100">
-              <option value="">Selecciona una acción</option>
-              <option *ngFor="let action of filteredActions" [value]="action">
-                {{ action }}
-              </option>
-            </select>
-            <p *ngIf="!addPermissionForm.resource" class="mt-1 text-xs text-gray-500">
-              Primero selecciona un recurso
-            </p>
-          </div>
-          <div *ngIf="loadingResources" class="flex items-center justify-center py-4">
-            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
-            <span class="ml-2 text-sm text-gray-600">Cargando recursos...</span>
-          </div>
-        </div>
-        <div *ngIf="error" class="mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
-          <p class="text-sm text-red-800">{{ error }}</p>
-        </div>
-        <div class="mt-6 flex gap-3 justify-end">
-          <button type="button" (click)="closeAddPermissionModal()"
-            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-            Cancelar
-          </button>
-          <button type="submit" [disabled]="loadingPermissions || loadingResources"
-            class="flex-none rounded-md bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition disabled:opacity-50">
-            Agregar
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- Delete Permission Modal -->
-<div *ngIf="showDeletePermissionModal"
-  class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-[60] flex items-center justify-center">
-  <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-900">Eliminar Permiso</h3>
-    </div>
-    <div class="p-6">
-      <p class="text-gray-700 mb-4">
-        ¿Estás seguro que deseas eliminar el permiso
-        <strong>{{ selectedPermission?.resource }}:{{ selectedPermission?.action }}</strong>?
-      </p>
-      <div *ngIf="error" class="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
-        <p class="text-sm text-red-800">{{ error }}</p>
-      </div>
-      <div class="flex gap-3 justify-end">
-        <button (click)="closeDeletePermissionModal()"
-          class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-          Cancelar
-        </button>
-        <button (click)="removePermission()" [disabled]="loadingPermissions"
-          class="flex-none rounded-md bg-red-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-red-700 transition disabled:opacity-50">
-          Eliminar
-        </button>
-      </div>
+      <button *ngIf="canManageRoles() && !isDefaultRole(selectedRole?.name || '')" (click)="savePermissions()"
+        [disabled]="loadingPermissions || !hasUnsavedChanges"
+        class="flex-none rounded-md bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition disabled:opacity-50 flex items-center gap-2">
+        <svg *ngIf="!loadingPermissions" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        <span *ngIf="loadingPermissions"
+          class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+        Guardar Cambios
+      </button>
     </div>
   </div>
 </div>

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import {
   Application,
   AppResource,
@@ -19,6 +20,18 @@ import { ApplicationManagementService } from 'src/app/core/services/application-
 import { AuthService } from 'src/app/core/services/auth/auth.service';
 import { RoleManagementService } from 'src/app/core/services/role-management.service';
 import { TenantManagementService } from 'src/app/core/services/tenant-management.service';
+
+interface ResourceGroup {
+  resource: string;
+  actions: {
+    action: string;
+    hasPermission: boolean;
+    permissionId?: string;
+    originalState: boolean;
+    appId: string;
+    applicationId: string;
+  }[];
+}
 
 @Component({
   selector: 'app-roles',
@@ -44,9 +57,6 @@ export class RolesComponent implements OnInit {
   showEditRoleModal = false;
   showDeleteRoleModal = false;
   showPermissionsModal = false;
-  showAddPermissionModal = false;
-  showDeletePermissionModal = false;
-  selectedPermission: Permission | null = null;
 
   // Form data
   createRoleForm = {
@@ -57,18 +67,14 @@ export class RolesComponent implements OnInit {
     name: '',
   };
 
-  addPermissionForm = {
-    applicationId: '',
-    resource: '',
-    action: '',
-  };
-
   // Available apps, resources and actions from backend
   availableApplications: Application[] = [];
   availableResources: AppResource[] = [];
-  filteredResources: string[] = [];
-  filteredActions: string[] = [];
-  loadingResources = false;
+
+  // Tree state
+  selectedAppId: string = '';
+  groupedResources: ResourceGroup[] = [];
+  hasUnsavedChanges: boolean = false;
 
   constructor(
     private roleService: RoleManagementService,
@@ -81,7 +87,6 @@ export class RolesComponent implements OnInit {
   ) { }
 
   async ngOnInit() {
-    // Get tenant ID from route
     this.tenantId = this.route.snapshot.params['tenantId'];
 
     if (!this.tenantId) {
@@ -107,7 +112,6 @@ export class RolesComponent implements OnInit {
   }
 
   async loadTenant() {
-    // First, get all user's tenants to find the role
     this.tenantService.getAllTenants().subscribe({
       next: (response) => {
         const userTenant = response.tenants.find((t) => t.id === this.tenantId);
@@ -137,22 +141,6 @@ export class RolesComponent implements OnInit {
         console.error('Error loading roles:', err);
         this.error = err.error?.message || 'Error al cargar roles';
         this.loading = false;
-      },
-    });
-  }
-
-  async loadPermissions(roleId: string) {
-    this.loadingPermissions = true;
-
-    this.roleService.getRolePermissions(roleId).subscribe({
-      next: (response) => {
-        this.permissions = response.permissions;
-        this.loadingPermissions = false;
-      },
-      error: (err) => {
-        console.error('Error loading permissions:', err);
-        this.error = err.error?.message || 'Error al cargar permisos';
-        this.loadingPermissions = false;
       },
     });
   }
@@ -220,140 +208,204 @@ export class RolesComponent implements OnInit {
     this.selectedRole = null;
   }
 
-  openPermissionsModal(role: CustomRole) {
+  async openPermissionsModal(role: CustomRole) {
     this.selectedRole = role;
     this.showPermissionsModal = true;
-    this.loadPermissions(role.id);
     this.error = null;
     this.success = null;
+    this.selectedAppId = '';
+    this.groupedResources = [];
+    this.hasUnsavedChanges = false;
+    this.loadingPermissions = true;
+
+    try {
+      // Fetch currently assigned permissions
+      const permRes = await firstValueFrom(this.roleService.getRolePermissions(role.id));
+      this.permissions = permRes.permissions;
+
+      // Fetch all resources available to this tenant
+      const resRes = await firstValueFrom(this.appResourceService.getAvailableResourcesForTenant(this.tenantId));
+      this.availableResources = resRes.resources;
+
+      // We need the actual application UUIDs for creating permissions, fetch all apps
+      let allApps: Application[] = [];
+      try {
+        const appsRes = await firstValueFrom(this.applicationManagementService.getAllApplications());
+        allApps = appsRes.applications || [];
+      } catch (e) {
+        console.error('Error fetching applications to map IDs', e);
+      }
+
+      // Extract unique applications
+      const appMap = new Map<string, Application>();
+      this.availableResources.forEach((resource) => {
+        if (!appMap.has(resource.appId)) {
+          const matchedApp = allApps.find(a => a.appId === resource.appId);
+          appMap.set(resource.appId, {
+            id: matchedApp?.id || '', // Internal Application ID needed for backend
+            appId: resource.appId,
+            name: resource.applicationName,
+            url: '',
+            description: null,
+            logoUrl: null,
+            isActive: true,
+            createdAt: '',
+            updatedAt: '',
+          });
+        }
+      });
+      this.availableApplications = Array.from(appMap.values());
+
+      this.loadingPermissions = false;
+
+      // Select the first app by default to show its tree
+      if (this.availableApplications.length > 0) {
+        this.selectedAppId = this.availableApplications[0].appId;
+        this.onAppSelectionChange();
+      }
+    } catch (err: any) {
+      console.error('Error loading permissions data:', err);
+      this.loadingPermissions = false;
+      this.error = err.error?.message || 'Error al cargar permisos';
+    }
   }
 
   closePermissionsModal() {
+    if (this.hasUnsavedChanges) {
+      if (!confirm('Tienes cambios sin guardar. ¿Estás seguro de cerrar?')) {
+        return;
+      }
+    }
     this.showPermissionsModal = false;
     this.selectedRole = null;
     this.permissions = [];
+    this.groupedResources = [];
+    this.hasUnsavedChanges = false;
   }
 
-  openAddPermissionModal() {
-    this.addPermissionForm = {
-      applicationId: '',
-      resource: '',
-      action: '',
-    };
-    this.loadAvailableResources();
-    this.showAddPermissionModal = true;
+  onAppSelectionChange() {
     this.error = null;
     this.success = null;
-  }
 
-  closeAddPermissionModal() {
-    this.showAddPermissionModal = false;
-  }
+    if (!this.selectedAppId) {
+      this.groupedResources = [];
+      return;
+    }
 
-  openDeletePermissionModal(permission: Permission) {
-    this.selectedPermission = permission;
-    this.showDeletePermissionModal = true;
-    this.error = null;
-    this.success = null;
-  }
+    const selectedApp = this.availableApplications.find(a => a.appId === this.selectedAppId);
+    if (!selectedApp) return;
 
-  closeDeletePermissionModal() {
-    this.showDeletePermissionModal = false;
-    this.selectedPermission = null;
-  }
+    const resourcesForApp = this.availableResources.filter(r => r.appId === this.selectedAppId);
 
-  // Load available resources for tenant
-  async loadAvailableResources() {
-    this.loadingResources = true;
-    this.error = null;
+    const groups: { [key: string]: ResourceGroup } = {};
 
-    this.appResourceService
-      .getAvailableResourcesForTenant(this.tenantId)
-      .subscribe({
-        next: (response) => {
-          this.availableResources = response.resources;
+    for (const res of resourcesForApp) {
+      if (!groups[res.resource]) {
+        groups[res.resource] = { resource: res.resource, actions: [] };
+      }
 
-          // Get unique applications
-          const appMap = new Map<string, Application>();
-          this.availableResources.forEach((resource) => {
-            if (!appMap.has(resource.appId)) {
-              appMap.set(resource.appId, {
-                id: '', // We don't have full app data, but appId is enough
-                appId: resource.appId,
-                name: resource.applicationName,
-                url: '',
-                description: null,
-                logoUrl: null,
-                isActive: true,
-                createdAt: '',
-                updatedAt: '',
-              });
-            }
-          });
-          this.availableApplications = Array.from(appMap.values());
-          this.loadingResources = false;
-        },
-        error: (err) => {
-          console.error('Error loading available resources:', err);
-          this.error =
-            err.error?.message || 'Error al cargar recursos disponibles';
-          this.loadingResources = false;
-        },
+      const assignedPerm = this.permissions.find(p => p.appId === res.appId && p.resource === res.resource && p.action === res.action);
+
+      groups[res.resource].actions.push({
+        action: res.action,
+        hasPermission: !!assignedPerm,
+        originalState: !!assignedPerm,
+        permissionId: assignedPerm?.id,
+        appId: res.appId,
+        applicationId: selectedApp.id
       });
+    }
+
+    this.groupedResources = Object.values(groups);
   }
 
-  // Filter resources when application changes
-  onApplicationChange() {
-    if (!this.addPermissionForm.applicationId) {
-      this.filteredResources = [];
-      this.filteredActions = [];
-      this.addPermissionForm.resource = '';
-      this.addPermissionForm.action = '';
-      return;
+  togglePermission(actionItem: any) {
+    if (!this.canManageRoles() || this.isDefaultRole(this.selectedRole?.name || '')) {
+      return; // Readonly mode prevents toggling
     }
-
-    const selectedApp = this.availableApplications.find(
-      (app) => app.appId === this.addPermissionForm.applicationId,
-    );
-
-    if (selectedApp) {
-      // Get unique resources for selected app
-      const resourcesForApp = this.availableResources.filter(
-        (r) => r.appId === selectedApp.appId,
-      );
-      this.filteredResources = [
-        ...new Set(resourcesForApp.map((r) => r.resource)),
-      ];
-      this.addPermissionForm.resource = '';
-      this.addPermissionForm.action = '';
-      this.filteredActions = [];
-    }
+    actionItem.hasPermission = !actionItem.hasPermission;
+    this.checkUnsavedChanges();
   }
 
-  // Filter actions when resource changes
-  onResourceChange() {
-    if (
-      !this.addPermissionForm.resource ||
-      !this.addPermissionForm.applicationId
-    ) {
-      this.filteredActions = [];
-      this.addPermissionForm.action = '';
-      return;
+  checkUnsavedChanges() {
+    let hasChanges = false;
+
+    // Check all actions to see if any toggled state differs from its original server state
+    for (const group of this.groupedResources) {
+      for (const item of group.actions) {
+        if (item.hasPermission !== item.originalState) {
+          hasChanges = true;
+          break;
+        }
+      }
+      if (hasChanges) break;
     }
 
-    const selectedApp = this.availableApplications.find(
-      (app) => app.appId === this.addPermissionForm.applicationId,
-    );
+    this.hasUnsavedChanges = hasChanges;
+  }
 
-    if (selectedApp) {
-      // Get actions for selected app and resource
-      const actionsForResource = this.availableResources.filter(
-        (r) =>
-          r.appId === selectedApp.appId &&
-          r.resource === this.addPermissionForm.resource,
-      );
-      this.filteredActions = actionsForResource.map((r) => r.action);
-      this.addPermissionForm.action = '';
+  selectAllForResource(group: ResourceGroup, isChecked: boolean) {
+    if (!this.canManageRoles() || this.isDefaultRole(this.selectedRole?.name || '')) return;
+    for (const actionItem of group.actions) {
+      actionItem.hasPermission = isChecked;
+    }
+    this.checkUnsavedChanges();
+  }
+
+  areAllSelected(group: ResourceGroup): boolean {
+    return group.actions.length > 0 && group.actions.every(a => a.hasPermission);
+  }
+
+  async savePermissions() {
+    if (!this.selectedRole || !this.hasUnsavedChanges) return;
+
+    this.loadingPermissions = true;
+    this.error = null;
+    this.success = null;
+
+    const addPromises: Promise<any>[] = [];
+    const removePromises: Promise<any>[] = [];
+
+    for (const group of this.groupedResources) {
+      for (const actionItem of group.actions) {
+        // If it was added
+        if (actionItem.hasPermission && !actionItem.originalState) {
+          addPromises.push(firstValueFrom(this.roleService.addPermission(this.selectedRole.id, {
+            applicationId: actionItem.applicationId,
+            resource: group.resource,
+            action: actionItem.action
+          })));
+        }
+        // If it was removed
+        else if (!actionItem.hasPermission && actionItem.originalState && actionItem.permissionId) {
+          removePromises.push(firstValueFrom(this.roleService.removePermission(this.selectedRole.id, actionItem.permissionId)));
+        }
+      }
+    }
+
+    try {
+      await Promise.all([...addPromises, ...removePromises]);
+      this.success = 'Permisos actualizados exitosamente';
+
+      // Refresh current state after successful save
+      const permRes = await firstValueFrom(this.roleService.getRolePermissions(this.selectedRole.id));
+      this.permissions = permRes.permissions;
+      this.hasUnsavedChanges = false;
+
+      // Re-initialize the tree with the newly saved originalStates
+      this.onAppSelectionChange();
+
+      this.loadingPermissions = false;
+    } catch (err: any) {
+      console.error(err);
+      this.loadingPermissions = false;
+      this.error = 'Ocurrió un error parcial al actualizar permisos. Verifica la selección actual.';
+      // Refresh anyway to display the true server state
+      try {
+        const permRes = await firstValueFrom(this.roleService.getRolePermissions(this.selectedRole.id));
+        this.permissions = permRes.permissions;
+        this.onAppSelectionChange();
+      } catch (e) { }
     }
   }
 
@@ -431,98 +483,6 @@ export class RolesComponent implements OnInit {
         this.loading = false;
       },
     });
-  }
-
-  async addPermission() {
-    if (
-      !this.selectedRole ||
-      !this.addPermissionForm.applicationId ||
-      !this.addPermissionForm.resource ||
-      !this.addPermissionForm.action
-    ) {
-      this.error = 'Aplicación, recurso y acción son requeridos';
-      return;
-    }
-
-    this.loadingPermissions = true;
-    this.error = null;
-
-    // Find the full application ID from appId
-    const selectedApp = this.availableApplications.find(
-      (app) => app.appId === this.addPermissionForm.applicationId,
-    );
-
-    if (!selectedApp) {
-      this.error = 'Aplicación no encontrada';
-      this.loadingPermissions = false;
-      return;
-    }
-
-    // Get the actual application ID (UUID) from backend
-    this.applicationManagementService.getAllApplications().subscribe({
-      next: (appsResponse: {
-        success: boolean;
-        applications: Application[];
-      }) => {
-        const fullApp = appsResponse.applications.find(
-          (a: Application) => a.appId === selectedApp.appId,
-        );
-
-        if (!fullApp) {
-          this.error = 'No se pudo obtener el ID de la aplicación';
-          this.loadingPermissions = false;
-          return;
-        }
-
-        const data: CreatePermissionDto = {
-          applicationId: fullApp.id,
-          resource: this.addPermissionForm.resource,
-          action: this.addPermissionForm.action,
-        };
-
-        this.roleService.addPermission(this.selectedRole!.id, data).subscribe({
-          next: (response) => {
-            this.success = 'Permiso agregado exitosamente';
-            this.closeAddPermissionModal();
-            this.loadPermissions(this.selectedRole!.id);
-          },
-          error: (err) => {
-            console.error('Error adding permission:', err);
-            this.error = err.error?.message || 'Error al agregar permiso';
-            this.loadingPermissions = false;
-          },
-        });
-      },
-      error: (err) => {
-        console.error('Error loading applications:', err);
-        this.error = 'Error al cargar aplicaciones';
-        this.loadingPermissions = false;
-      },
-    });
-  }
-
-  async removePermission() {
-    if (!this.selectedRole || !this.selectedPermission) {
-      return;
-    }
-
-    this.loadingPermissions = true;
-    this.error = null;
-
-    this.roleService
-      .removePermission(this.selectedRole.id, this.selectedPermission.id)
-      .subscribe({
-        next: (response) => {
-          this.success = 'Permiso eliminado exitosamente';
-          this.closeDeletePermissionModal();
-          this.loadPermissions(this.selectedRole!.id);
-        },
-        error: (err) => {
-          console.error('Error removing permission:', err);
-          this.error = err.error?.message || 'Error al eliminar permiso';
-          this.loadingPermissions = false;
-        },
-      });
   }
 
   goBack() {
