@@ -74,16 +74,20 @@ export class SignInComponent implements OnInit {
       this.appId = params['app_id'] || '';
       this.tenantId = params['tenant_id'] || '';
 
+      console.log(`[SignIn] Query Params -> redirectUri: ${this.redirectUri}, appId: ${this.appId}, tenantId: ${this.tenantId}`);
+
       // If redirected by guard, extract from returnUrl
       const returnUrl = params['returnUrl'];
       if (returnUrl) {
+        console.log(`[SignIn] Found returnUrl:`, returnUrl);
         try {
           const urlTree = this.router.parseUrl(returnUrl);
           this.redirectUri = this.redirectUri || urlTree.queryParams['redirect_uri'] || '';
           this.appId = this.appId || urlTree.queryParams['app_id'] || '';
           this.tenantId = this.tenantId || urlTree.queryParams['tenant_id'] || '';
+          console.log(`[SignIn] Extracted from returnUrl -> redirectUri: ${this.redirectUri}, appId: ${this.appId}, tenantId: ${this.tenantId}`);
         } catch (e) {
-          console.error('Error parsing returnUrl', e);
+          console.error('[SignIn] Error parsing returnUrl', e);
         }
       }
 
@@ -91,6 +95,9 @@ export class SignInComponent implements OnInit {
       if (this.redirectUri && this.appId) {
         this.loginMode = 'app-initiated';
         this.appName = this.getAppName(this.appId);
+        console.log(`[SignIn] Login Mode detected: app-initiated for ${this.appName}`);
+      } else {
+        console.log(`[SignIn] Login Mode detected: direct`);
       }
 
       // Auto-fill nit if provided
@@ -194,22 +201,26 @@ export class SignInComponent implements OnInit {
   }
 
   handlePostLoginRedirect() {
+    console.log(`[SignIn] handlePostLoginRedirect called. Mode: ${this.loginMode}`);
     if (this.loginMode === 'app-initiated') {
       // App-initiated flow
       if (this.tenantId) {
+        console.log(`[SignIn] Tenant ID present (${this.tenantId}), bypassing selector. Authorizing...`);
         // Tenant already specified, generate auth code directly
         this.authService.authorize(this.tenantId, this.appId, this.redirectUri).subscribe({
           next: (response) => {
+            console.log(`[SignIn] Authorization success. Redirecting to:`, response.redirectUri);
             window.location.href = response.redirectUri;
           },
           error: (err) => {
-            console.error('Error authorizing:', err);
+            console.error('[SignIn] Error authorizing:', err);
             toast.error('Error al autorizar acceso', {
               position: 'bottom-right'
             });
           }
         });
       } else {
+        console.log(`[SignIn] Navigating to tenant-selector with app_id=${this.appId}, redirect_uri=${this.redirectUri}`);
         // Go to tenant selector
         this.router.navigate(['/dashboard/select-tenant'], {
           queryParams: {
@@ -221,6 +232,7 @@ export class SignInComponent implements OnInit {
     } else {
       // Direct login - go to returnUrl or SSO dashboard
       const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+      console.log(`[SignIn] Direct login logic. Navigating to returnUrl:`, returnUrl);
       this.router.navigateByUrl(returnUrl);
     }
   }
