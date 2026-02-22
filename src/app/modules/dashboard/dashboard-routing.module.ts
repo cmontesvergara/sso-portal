@@ -40,10 +40,6 @@ const routes: Routes = [
         component: HomeComponent,
       },
       {
-        path: 'select-tenant',
-        component: TenantSelectorComponent,
-      },
-      {
         path: 'profile',
         canActivate: [isLoggedGuard],
         loadChildren: () =>

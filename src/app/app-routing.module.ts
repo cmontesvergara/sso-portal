@@ -32,6 +32,12 @@ const routes: Routes = [
       import('./modules/auth/auth.module').then((m) => m.AuthModule),
   },
   {
+    path: 'dashboard/select-tenant',
+    canActivate: [isLoggedGuard],
+    loadComponent: () =>
+      import('./modules/dashboard/pages/tenant-selector/tenant-selector.component').then((m) => m.TenantSelectorComponent),
+  },
+  {
     path: 'dashboard',
     canActivateChild: [isLoggedGuard],
     loadChildren: () =>

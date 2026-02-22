@@ -6,11 +6,12 @@ import {
   AuthService,
   TenantWithApps,
 } from 'src/app/core/services/auth/auth.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-tenant-selector',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './tenant-selector.component.html',
   styleUrls: ['./tenant-selector.component.scss'],
 })
