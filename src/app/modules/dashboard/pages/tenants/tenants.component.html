@@ -395,17 +395,31 @@
       <!-- Right Column: Users List -->
       <div class="w-full md:w-2/3">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 h-full overflow-hidden flex flex-col">
-          <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-            <span class="font-medium text-gray-900">Usuarios del Tenant</span>
-            <div class="flex gap-2" *ngIf="selectedAppId && usersAccessState.length > 0">
-              <button (click)="toggleAllAccess(true)"
-                class="text-xs px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50 text-gray-700">
-                Seleccionar Todo
-              </button>
-              <button (click)="toggleAllAccess(false)"
-                class="text-xs px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50 text-gray-700">
-                Desmarcar Todo
-              </button>
+          <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 flex flex-col gap-3">
+            <div class="flex justify-between items-center">
+              <span class="font-medium text-gray-900">Usuarios del Tenant</span>
+              <div class="flex gap-2" *ngIf="selectedAppId && filteredUsersAccessState.length > 0">
+                <button (click)="toggleAllAccess(true)"
+                  class="text-xs px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50 text-gray-700">
+                  Seleccionar Todo
+                </button>
+                <button (click)="toggleAllAccess(false)"
+                  class="text-xs px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50 text-gray-700">
+                  Desmarcar Todo
+                </button>
+              </div>
+            </div>
+
+            <!-- Buscador de usuarios -->
+            <div class="relative" *ngIf="selectedAppId && usersAccessState.length > 0">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input type="text" [(ngModel)]="usersAccessSearch" placeholder="Buscar usuario por nombre o correo..."
+                class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 bg-white">
             </div>
           </div>
 
@@ -414,11 +428,11 @@
               <p>Selecciona una aplicación a la izquierda para ver los accesos.</p>
             </div>
 
-            <div *ngIf="selectedAppId && usersAccessState.length === 0" class="text-center py-10 text-gray-500">
-              <p>No hay usuarios en esta organización.</p>
+            <div *ngIf="selectedAppId && filteredUsersAccessState.length === 0" class="text-center py-10 text-gray-500">
+              <p>No se encontraron usuarios.</p>
             </div>
 
-            <div *ngFor="let user of usersAccessState"
+            <div *ngFor="let user of filteredUsersAccessState"
               class="flex items-center justify-between p-3 border rounded-lg transition-colors"
               [class.bg-green-50]="user.hasAccess && user.hasAccess === user.originalState"
               [class.border-green-200]="user.hasAccess && user.hasAccess === user.originalState"

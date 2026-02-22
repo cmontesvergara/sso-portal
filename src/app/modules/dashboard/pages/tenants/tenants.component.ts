@@ -274,6 +274,7 @@ export class TenantsComponent implements OnInit {
   selectedAppId = '';
   hasUnsavedAccessChanges = false;
   loadingAccess = false;
+  usersAccessSearch = '';
 
   usersAccessState: {
     userId: string;
@@ -293,6 +294,7 @@ export class TenantsComponent implements OnInit {
     this.success = null;
     this.hasUnsavedAccessChanges = false;
     this.selectedAppId = '';
+    this.usersAccessSearch = '';
     this.usersAccessState = [];
 
     // Load available apps for this tenant
@@ -344,6 +346,7 @@ export class TenantsComponent implements OnInit {
     this.tenantMembers = [];
     this.usersAccessState = [];
     this.selectedAppId = '';
+    this.usersAccessSearch = '';
     this.hasUnsavedAccessChanges = false;
   }
 
@@ -388,13 +391,23 @@ export class TenantsComponent implements OnInit {
     });
   }
 
+  get filteredUsersAccessState() {
+    if (!this.usersAccessSearch.trim()) return this.usersAccessState;
+    const term = this.usersAccessSearch.toLowerCase();
+    return this.usersAccessState.filter(u =>
+      u.firstName.toLowerCase().includes(term) ||
+      u.lastName.toLowerCase().includes(term) ||
+      u.email.toLowerCase().includes(term)
+    );
+  }
+
   toggleUserAccess(userState: any) {
     userState.hasAccess = !userState.hasAccess;
     this.checkUnsavedAccessChanges();
   }
 
   toggleAllAccess(grant: boolean) {
-    this.usersAccessState.forEach(u => u.hasAccess = grant);
+    this.filteredUsersAccessState.forEach(u => u.hasAccess = grant);
     this.checkUnsavedAccessChanges();
   }
 
@@ -403,11 +416,11 @@ export class TenantsComponent implements OnInit {
   }
 
   get allUsersHaveAccess(): boolean {
-    return this.usersAccessState.length > 0 && this.usersAccessState.every(u => u.hasAccess);
+    return this.filteredUsersAccessState.length > 0 && this.filteredUsersAccessState.every(u => u.hasAccess);
   }
 
   get someUsersHaveAccess(): boolean {
-    return this.usersAccessState.some(u => u.hasAccess) && !this.allUsersHaveAccess;
+    return this.filteredUsersAccessState.some(u => u.hasAccess) && !this.allUsersHaveAccess;
   }
 
   async saveAccessChanges() {
