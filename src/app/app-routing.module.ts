@@ -1,35 +1,30 @@
-import { Component, NgModule } from '@angular/core';
-import { ActivatedRoute, Router, RouterModule, Routes } from '@angular/router';
+import { inject, NgModule } from '@angular/core';
+import { ActivatedRouteSnapshot, Router, RouterModule, Routes, RouterStateSnapshot } from '@angular/router';
 import { isLoggedGuard } from './core/guards/is-logged/is-logged.guard';
-
-@Component({
-  template: '',
-  standalone: true,
-})
-class RootComponent {
-  constructor(private route: ActivatedRoute, private router: Router) {
-    this.route.queryParams.subscribe((params) => {
-      const appId = params['app_id'];
-      const redirectUri = params['redirect_uri'];
-
-      if (appId && redirectUri) {
-        // App-initiated flow - redirect to tenant selector
-        this.router.navigate(['/dashboard/select-tenant'], {
-          queryParams: { app_id: appId, redirect_uri: redirectUri },
-        });
-      } else {
-        // Normal flow - go to dashboard
-        this.router.navigate(['/dashboard']);
-      }
-    });
-  }
-}
 
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'dashboard',
     pathMatch: 'full',
+    canActivate: [
+      (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+        const router = inject(Router);
+        const appId = route.queryParams['app_id'];
+        const redirectUri = route.queryParams['redirect_uri'];
+
+        console.log(`[RootGuard] Intercepting root. app_id=${appId}, redirect_uri=${redirectUri}`);
+
+        if (appId && redirectUri) {
+          console.log('[RootGuard] App-initiated flow detected. Redirecting to /dashboard/select-tenant');
+          return router.createUrlTree(['/dashboard/select-tenant'], {
+            queryParams: { app_id: appId, redirect_uri: redirectUri },
+          });
+        }
+
+        console.log('[RootGuard] Normal flow detected. Redirecting to /dashboard');
+        return router.createUrlTree(['/dashboard']);
+      }
+    ],
   },
   {
     path: 'auth',
