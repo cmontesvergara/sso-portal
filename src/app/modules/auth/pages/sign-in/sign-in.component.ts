@@ -74,6 +74,19 @@ export class SignInComponent implements OnInit {
       this.appId = params['app_id'] || '';
       this.tenantId = params['tenant_id'] || '';
 
+      // If redirected by guard, extract from returnUrl
+      const returnUrl = params['returnUrl'];
+      if (returnUrl) {
+        try {
+          const urlTree = this.router.parseUrl(returnUrl);
+          this.redirectUri = this.redirectUri || urlTree.queryParams['redirect_uri'] || '';
+          this.appId = this.appId || urlTree.queryParams['app_id'] || '';
+          this.tenantId = this.tenantId || urlTree.queryParams['tenant_id'] || '';
+        } catch (e) {
+          console.error('Error parsing returnUrl', e);
+        }
+      }
+
       // Determine login mode
       if (this.redirectUri && this.appId) {
         this.loginMode = 'app-initiated';
@@ -206,8 +219,9 @@ export class SignInComponent implements OnInit {
         });
       }
     } else {
-      // Direct login - go to SSO dashboard
-      this.router.navigate(['/dashboard']);
+      // Direct login - go to returnUrl or SSO dashboard
+      const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+      this.router.navigateByUrl(returnUrl);
     }
   }
   toggleRememberButton() {
