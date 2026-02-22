@@ -154,6 +154,10 @@ export class RolesComponent implements OnInit {
   }
 
   isDefaultRole(roleName: string): boolean {
+    // Super Admins can modify default roles
+    if (this.user?.systemRole === SystemRole.SUPER_ADMIN || this.user?.systemRole === SystemRole.SYSTEM_ADMIN) {
+      return false;
+    }
     return ['admin', 'member', 'viewer'].includes(roleName.toLowerCase());
   }
 
