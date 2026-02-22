@@ -504,7 +504,8 @@
             class="flex items-center justify-between py-2 border-b last:border-b-0">
             <span>{{ app.name }}</span>
             <div class="flex gap-2">
-              <button *ngIf="canManageTenant(selectedTenant!)" (click)="openAccessModal(app)"
+              <button *ngIf="canManageTenant(selectedTenant!)"
+                (click)="openUnifiedAccessModal(selectedTenant!, app.id); closeAppsModal()"
                 class="text-blue-600 hover:text-blue-900 text-xs flex items-center gap-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

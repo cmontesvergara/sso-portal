@@ -285,7 +285,7 @@ export class TenantsComponent implements OnInit {
     originalState: boolean;
   }[] = [];
 
-  openUnifiedAccessModal(tenant: Tenant) {
+  openUnifiedAccessModal(tenant: Tenant, initialAppId?: string) {
     this.selectedTenant = tenant;
     this.showUnifiedAccessModal = true;
     this.loadingAccess = true;
@@ -307,7 +307,11 @@ export class TenantsComponent implements OnInit {
             this.loadingAccess = false;
 
             if (this.tenantAccessApps.length > 0) {
-              this.selectedAppId = this.tenantAccessApps[0].id;
+              if (initialAppId && this.tenantAccessApps.some(a => a.id === initialAppId)) {
+                this.selectedAppId = initialAppId;
+              } else {
+                this.selectedAppId = this.tenantAccessApps[0].id;
+              }
               this.onAccessAppSelectionChange();
             } else {
               this.error = "Esta organización no tiene aplicaciones asignadas.";
