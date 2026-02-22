@@ -176,7 +176,7 @@ export class RolesComponent implements OnInit {
   }
 
   openEditRoleModal(role: CustomRole) {
-    if (this.isDefaultRole(role.name)) {
+    if (['admin', 'member', 'viewer'].includes(role.name.toLowerCase())) {
       this.error = 'No se pueden editar roles predeterminados';
       return;
     }
@@ -196,7 +196,7 @@ export class RolesComponent implements OnInit {
   }
 
   openDeleteRoleModal(role: CustomRole) {
-    if (this.isDefaultRole(role.name)) {
+    if (['admin', 'member', 'viewer'].includes(role.name.toLowerCase())) {
       this.error = 'No se pueden eliminar roles predeterminados';
       return;
     }
