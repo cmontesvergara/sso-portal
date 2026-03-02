@@ -44,12 +44,12 @@
       <input type="text" id="nit" formControlName="nit" class="peer block" placeholder=" " />
       <label for="nit"
         class="absolute top-2 left-1 z-10 origin-[0] -translate-y-4 scale-95 transform bg-background px-2 text-sm text-muted-foreground duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-95 peer-focus:px-2 peer-focus:text-primary">
-        Numero de Identificación
+        Correo electronico
       </label>
       <div *ngIf="f['nit'].dirty && f['nit'].errors" class="is__invalid-error">
         <div *ngIf="f['nit'].errors['required']">Campo requerido</div>
         <div *ngIf="f['nit'].errors['minlength']">El Numero de Identificación debe tener minimo 6 digitos</div>
-        <div *ngIf="f['nit'].errors['maxlength']">El Numero de Identificación debe tener maximo  10 digitos</div>
+        <div *ngIf="f['nit'].errors['maxlength']">El Numero de Identificación debe tener maximo 10 digitos</div>
       </div>
     </div>
     <div class="relative">
@@ -61,7 +61,8 @@
       <div *ngIf="f['phone'].dirty && f['phone'].errors" class="is__invalid-error">
         <div *ngIf="f['phone'].errors['required']">Campo requerido</div>
         <div *ngIf="f['phone'].errors['pattern']">El Numero de Telefono debe Inciar por 3</div>
-        <div *ngIf="f['phone'].errors['minlength'] || f['phone'].errors['maxlength']">El Numero de Telefono debe tener 10 digitos</div>
+        <div *ngIf="f['phone'].errors['minlength'] || f['phone'].errors['maxlength']">El Numero de Telefono debe tener
+          10 digitos</div>
       </div>
     </div>
 
@@ -105,21 +106,15 @@
       Usa 8 o más caracteres con una combinación de letras, números y símbolos.
     </span>
     <div class="relative">
-      <input
-      [type]="passwordTextType ? 'text' : 'password'"
-      [ngClass]="{
+      <input [type]="passwordTextType ? 'text' : 'password'" [ngClass]="{
         'is__invalid-input focus:ring-transparent':
         f['confirmPassword'].dirty && ( f['confirmPassword'].errors  ||
         f['confirmPassword'].value !== f['password'].value )
 
-       }"
-       type="password" id="confirm-password"
-        formControlName="confirmPassword"
-        class="peer block"
-        placeholder=" " />
+       }" type="password" id="confirm-password" formControlName="confirmPassword" class="peer block" placeholder=" " />
 
 
-        <label for="confirm-password"
+      <label for="confirm-password"
         class="absolute top-2 left-1 z-10 origin-[0] -translate-y-4 scale-95 transform bg-background px-2 text-sm text-muted-foreground duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-95 peer-focus:px-2 peer-focus:text-primary">
         Confirmar Contraseña
       </label>
@@ -130,13 +125,15 @@
     <div class="flex items-center gap-1">
       <input id="accept-term" name="accept-term" type="checkbox" formControlName="acceptTerms" />
       <label for="accept-term" class="ml-2 block text-sm text-muted-foreground"> Acepto los </label>
-      <app-button routerLink="/home/terms" impact="none" tone="primary" shape="rounded" size="small"> Términos </app-button>
+      <app-button routerLink="/home/terms" impact="none" tone="primary" shape="rounded" size="small"> Términos
+      </app-button>
     </div>
   </div>
 
   <!-- Submit Button -->
   <div>
-    <app-button [disabled]="signUpForm.invalid" full impact="bold" tone="primary" shape="rounded" size="medium">Registrarse</app-button>
+    <app-button [disabled]="signUpForm.invalid" full impact="bold" tone="primary" shape="rounded"
+      size="medium">Registrarse</app-button>
   </div>
 
   <!-- Sign-up -->
