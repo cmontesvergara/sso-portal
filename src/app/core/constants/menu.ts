@@ -29,6 +29,7 @@ export class Menu {
           ],
         },
         {
+          hidden: true,
           icon: 'assets/icons/heroicons/outline/lock-closed.svg',
           label: 'Mis Apps',
           route: '/apps',
@@ -79,7 +80,7 @@ export class Menu {
     {
       group: 'Collaboration',
       separator: true,
-      hidden: false,
+      hidden: true,
       items: [
         {
           label: 'Descubre Apps',
