@@ -4,8 +4,11 @@
     <!-- App-initiated mode -->
     <div *ngIf="loginMode === 'app-initiated'" class="mb-4">
       <div class="inline-flex items-center px-4 py-2 bg-primary-50 rounded-lg mb-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600 mr-2" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600 mr-2" viewBox="0 0 20 20"
+          fill="currentColor">
+          <path fill-rule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+            clip-rule="evenodd" />
         </svg>
         <span class="text-sm font-medium text-primary-700">Autenticando para {{ appName }}</span>
       </div>
@@ -37,17 +40,11 @@
   <div class="space-y-3 text-left">
     <div class="form__group">
       <div class="relative">
-        <input
-          type="text"
-          id="nit"
-          [ngClass]="{ 'is__invalid-input': submitted && f['nit'].errors }"
-          class="peer block"
-          placeholder=" "
-          formControlName="nit" />
-        <label
-          for="nit"
+        <input type="text" id="nit" [ngClass]="{ 'is__invalid-input': submitted && f['nit'].errors }" class="peer block"
+          placeholder=" " formControlName="nit" />
+        <label for="nit"
           class="absolute top-2 left-1 z-10 origin-[0] -translate-y-4 scale-95 transform bg-background px-2 text-sm text-muted-foreground duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-95 peer-focus:px-2 peer-focus:text-primary">
-          Número de Identificación
+          Correo electronico
         </label>
       </div>
       <div *ngIf="submitted && f['nit'].errors" class="is__invalid-error">
@@ -58,26 +55,19 @@
 
     <div class="form__group">
       <div class="relative">
-        <input
-          [type]="passwordTextType ? 'text' : 'password'"
-          id="password"
-          [ngClass]="{ 'is__invalid-input': submitted && f['password'].errors }"
-          class="peer block"
-          placeholder=" "
+        <input [type]="passwordTextType ? 'text' : 'password'" id="password"
+          [ngClass]="{ 'is__invalid-input': submitted && f['password'].errors }" class="peer block" placeholder=" "
           formControlName="password" />
-        <label
-          for="password"
+        <label for="password"
           class="absolute top-2 left-1 z-10 origin-[0] -translate-y-4 scale-95 transform bg-background px-2 text-sm text-muted-foreground duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-95 peer-focus:px-2 peer-focus:text-primary">
           Contraseña
         </label>
         <span class="absolute top-2.5 right-5 cursor-pointer text-muted-foreground" (click)="togglePasswordTextType()">
-          <svg-icon
-            [src]="
+          <svg-icon [src]="
               !passwordTextType
                 ? 'assets/icons/heroicons/outline/eye-off.svg'
                 : 'assets/icons/heroicons/outline/eye.svg'
-            "
-            [svgClass]="'h-5 w-5'">
+            " [svgClass]="'h-5 w-5'">
           </svg-icon>
         </span>
       </div>
@@ -89,8 +79,9 @@
 
   <div class="mb-2 flex items-center justify-between space-x-3">
     <div class="flex items-center">
-      <input id="remember-me" name="remember-me" type="checkbox" (click)="toggleRememberButton()"  formControlName="remember"/>
-      <label for="remember-me"  class="ml-2 block text-sm text-muted-foreground"> Recuérdame </label>
+      <input id="remember-me" name="remember-me" type="checkbox" (click)="toggleRememberButton()"
+        formControlName="remember" />
+      <label for="remember-me" class="ml-2 block text-sm text-muted-foreground"> Recuérdame </label>
     </div>
 
     <app-button routerLink="/auth/forgot-password" impact="none" tone="primary" shape="rounded" size="small">
@@ -100,7 +91,8 @@
 
   <!-- Botón de envío -->
   <div>
-    <app-button full [disabled]="this.form.invalid" impact="bold" tone="primary" shape="rounded" size="medium">Iniciar sesión</app-button>
+    <app-button full [disabled]="this.form.invalid" impact="bold" tone="primary" shape="rounded" size="medium">Iniciar
+      sesión</app-button>
   </div>
 
   <!-- Registro -->
