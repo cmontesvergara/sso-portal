@@ -174,28 +174,67 @@ export class SignInComponent implements OnInit {
         this.handlePostLoginRedirect();
       },
       (error) => {
-        if (error?.code === 401 && error?.resultCode === 'UNAUTHORIZED') {
-          this.form.controls['password'].setErrors({ invalid: true });
-
-          toast.error('Valida tus credenciales.', {
-            position: 'bottom-right',
-            description: 'Parece que tus credenciales no coinciden.',
-          });
-        }
         console.log('Error signIn:', error);
-        if (error?.error === 'ACCOUNT_NOT_ACTIVE') {
-          // Extract encoded userId from error details if available
-          const encodedUserId = error?.errors?.[0]?.userId;
 
+        // Cuenta no activa → redirigir a verificación de email
+        if (error?.error === 'ACCOUNT_NOT_ACTIVE') {
+          const encodedUserId = error?.errors?.[0]?.userId;
           if (encodedUserId) {
             this.loadingService.loading = true;
-            // Redirect to email verification with userId as query param
             this.router.navigate(['/auth/email-verification'], {
               queryParams: { userId: encodedUserId },
             });
+          } else {
+            toast.error('Cuenta no activa', {
+              position: 'bottom-right',
+              description: 'Tu cuenta aún no ha sido activada. Verifica tu correo electrónico.',
+            });
           }
+          return;
         }
 
+        // Credenciales inválidas
+        if (error?.code === 401 || error?.status === 401) {
+          this.form.controls['password'].setErrors({ invalid: true });
+          toast.error('Credenciales incorrectas', {
+            position: 'bottom-right',
+            description: 'El correo o la contraseña no coinciden. Intenta de nuevo.',
+          });
+          return;
+        }
+
+        // Límite de intentos alcanzado
+        if (error?.code === 429 || error?.status === 429) {
+          toast.error('Demasiados intentos', {
+            position: 'bottom-right',
+            description: 'Has superado el límite de intentos. Espera unos minutos antes de intentar de nuevo.',
+          });
+          return;
+        }
+
+        // Error de conexión / red
+        if (error?.status === 0 || error?.status === undefined) {
+          toast.error('Error de conexión', {
+            position: 'bottom-right',
+            description: 'No se pudo conectar con el servidor. Verifica tu conexión a internet.',
+          });
+          return;
+        }
+
+        // Error del servidor (500+)
+        if (error?.status >= 500) {
+          toast.error('Error del servidor', {
+            position: 'bottom-right',
+            description: 'Ocurrió un error inesperado. Intenta más tarde.',
+          });
+          return;
+        }
+
+        // Fallback genérico
+        toast.error('Error al iniciar sesión', {
+          position: 'bottom-right',
+          description: error?.message || 'Ocurrió un error inesperado. Intenta de nuevo.',
+        });
       },
     );
   }

@@ -21,6 +21,13 @@ export class EmailVerificationComponent implements OnInit {
   successMessage: string = '';
   encodedUserId: string | null = null;
 
+  // Manual code verification
+  codeSent: boolean = false;
+  verificationCode: string = '';
+  isVerifying: boolean = false;
+  verifyErrorMessage: string = '';
+  verifySuccessMessage: string = '';
+
   constructor(
     private readonly authService: AuthService,
     private readonly route: ActivatedRoute,
@@ -57,7 +64,7 @@ export class EmailVerificationComponent implements OnInit {
       userId = this.encodedUserId ? atob(this.encodedUserId) : null;
     } catch (error) {
       console.error('Error decoding userId:', error);
-    }if(!userId) {
+    } if (!userId) {
       this.isLoading = false;
       this.errorMessage = 'Error al enviar el código de verificación. Por favor verifica tu correo.';
       return;
@@ -65,28 +72,52 @@ export class EmailVerificationComponent implements OnInit {
     this.authService.sendEmailOtpCode(this.email, userId).subscribe({
       next: (response: any) => {
         this.isLoading = false;
-        this.successMessage = 'Si hay una cuenta vinculada a este correo, se enviará un link de verificación. Redirigiendo al login...';
-        this.email = '';
-
-        // Redirigir al signin después de 5 segundos
-        setTimeout(() => {
-          this.router.navigate(['/auth/sign-in']);
-        }, 5000);
+        this.successMessage = 'Se ha enviado un correo de verificación. Revisa tu bandeja de entrada.';
+        this.codeSent = true;
       },
       error: (error: any) => {
         this.isLoading = false;
         if (error.status === 400) {
           this.errorMessage = 'Error al enviar el código de verificación. Redirigiendo al login...';
+          setTimeout(() => {
+            this.router.navigate(['/auth/sign-in']);
+          }, 5000);
         } else {
-          this.successMessage = 'Si hay una cuenta vinculada a este correo, se enviará un link de verificación. Redirigiendo al login...';
+          this.successMessage = 'Si hay una cuenta vinculada a este correo, se enviará un correo de verificación.';
+          this.codeSent = true;
         }
         this.email = '';
+      }
+    });
+  }
 
-        // Redirigir al signin después de 5 segundos INDEPENDIENTEMENTE del error
+  verifyManualCode() {
+    if (!this.verificationCode || !this.verificationCode.trim()) {
+      this.verifyErrorMessage = 'Por favor ingresa el código de verificación';
+      return;
+    }
+
+    this.isVerifying = true;
+    this.verifyErrorMessage = '';
+    this.verifySuccessMessage = '';
+
+    this.authService.verifyEmailToken(this.verificationCode.trim()).subscribe({
+      next: (response: any) => {
+        this.isVerifying = false;
+        this.verifySuccessMessage = '¡Correo verificado exitosamente! Redirigiendo al inicio de sesión...';
         setTimeout(() => {
           this.router.navigate(['/auth/sign-in']);
-        }, 5000);
+        }, 3000);
+      },
+      error: (error: any) => {
+        this.isVerifying = false;
+        if (error.status === 401) {
+          this.verifyErrorMessage = 'El código es inválido o ha expirado. Verifica e intenta de nuevo.';
+        } else {
+          this.verifyErrorMessage = 'Ocurrió un error al verificar. Intenta de nuevo.';
+        }
       }
     });
   }
 }
+

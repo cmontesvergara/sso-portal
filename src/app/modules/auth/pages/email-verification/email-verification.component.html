@@ -2,65 +2,89 @@
   <div class="text-center mb-8">
     <h2 class="mb-1 text-3xl font-semibold text-foreground">Verificación de Email</h2>
     <p class="text-sm text-muted-foreground">
-      Ingresa tu correo electrónico para recibir el link de verificación
+      Ingresa tu correo electrónico para recibir el código de verificación
     </p>
 
   </div>
 
+  @if (!codeSent) {
   <!-- Campo de email -->
   <div class="space-y-2">
     <label for="email" class="block text-sm font-medium text-foreground">
       Correo Electrónico
     </label>
-    <input
-      type="email"
-      id="email"
-      name="email"
-      [(ngModel)]="email"
-      placeholder="ejemplo@correo.com"
-      required
-      class="w-full h-10 px-3 rounded-md border border-border bg-background text-foreground outline-none focus:border-primary"
-    />
+    <input type="email" id="email" name="email" [(ngModel)]="email" placeholder="ejemplo@correo.com" required
+      class="w-full h-10 px-3 rounded-md border border-border bg-background text-foreground outline-none focus:border-primary" />
   </div>
 
   <!-- Mensajes de error y éxito -->
   @if (errorMessage) {
-    <div class="p-3 rounded-md bg-red-50 text-red-600 text-sm">
-      {{ errorMessage }}
-    </div>
-  }
-  @if (successMessage) {
-    <div class="p-3 rounded-md bg-green-50 text-green-600 text-sm">
-      {{ successMessage }}
-    </div>
+  <div class="p-3 rounded-md bg-red-50 text-red-600 text-sm">
+    {{ errorMessage }}
+  </div>
   }
 
   <!-- Botón enviar -->
   <div>
-    <app-button
-      full
-      impact="bold"
-      tone="primary"
-      shape="rounded"
-      size="medium"
-      [disabled]="isLoading"
-    >
-      {{ isLoading ? 'Enviando...' : 'Enviar link de verificación' }}
+    <app-button full impact="bold" tone="primary" shape="rounded" size="medium" [disabled]="isLoading">
+      {{ isLoading ? 'Enviando...' : 'Enviar código de verificación' }}
     </app-button>
   </div>
+  }
+
+  @if (codeSent) {
+  <!-- Mensaje de éxito -->
+  @if (successMessage) {
+  <div class="p-3 rounded-md bg-green-50 text-green-600 text-sm">
+    {{ successMessage }}
+  </div>
+  }
+
+  <!-- Sección de ingreso manual del código -->
+  <div class="space-y-4 p-5 rounded-lg border border-border bg-card">
+    <div class="text-center">
+      <svg class="w-10 h-10 mx-auto text-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+      </svg>
+      <p class="text-sm font-medium text-foreground">¿No puedes abrir el enlace?</p>
+      <p class="text-xs text-muted-foreground mt-1">
+        Copia el código de verificación del correo y pégalo aquí
+      </p>
+    </div>
+
+    <div class="space-y-2">
+      <input type="text" id="verificationCode" name="verificationCode" [(ngModel)]="verificationCode"
+        placeholder="Pega aquí tu código de verificación"
+        class="w-full h-10 px-3 rounded-md border border-border bg-background text-foreground text-center font-mono text-sm tracking-wider outline-none focus:border-primary" />
+    </div>
+
+    <!-- Mensajes de verificación -->
+    @if (verifyErrorMessage) {
+    <div class="p-3 rounded-md bg-red-50 text-red-600 text-sm">
+      {{ verifyErrorMessage }}
+    </div>
+    }
+    @if (verifySuccessMessage) {
+    <div class="p-3 rounded-md bg-green-50 text-green-600 text-sm">
+      {{ verifySuccessMessage }}
+    </div>
+    }
+
+    <app-button full impact="bold" tone="primary" shape="rounded" size="medium"
+      [disabled]="isVerifying || !verificationCode" (click)="verifyManualCode()">
+      {{ isVerifying ? 'Verificando...' : 'Verificar código' }}
+    </app-button>
+  </div>
+  }
 
   <!-- Link para iniciar sesión -->
   <div class="text-center">
-    <a
-      routerLink="/auth/sign-in"
-      class="text-sm text-primary hover:underline"
-    >
+    <a routerLink="/auth/sign-in" class="text-sm text-primary hover:underline">
       Volver a iniciar sesión
     </a>
   </div>
 </form>
-
-
 
 <p class="mt-3 text-xs text-yellow-600 dark:text-yellow-500">
   Tu cuenta permanecerá desactivada mientras no se verifique el correo electrónico
