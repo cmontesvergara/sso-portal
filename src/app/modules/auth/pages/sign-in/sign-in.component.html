@@ -89,10 +89,11 @@
     </app-button>
   </div>
 
-  <!-- Botón de envío -->
   <div>
-    <app-button full [disabled]="this.form.invalid" impact="bold" tone="primary" shape="rounded" size="medium">Iniciar
-      sesión</app-button>
+    <app-button full [disabled]="this.form.invalid || isSubmitting" impact="bold" tone="primary" shape="rounded"
+      size="medium">
+      {{ isSubmitting ? 'Iniciando sesión...' : 'Iniciar sesión' }}
+    </app-button>
   </div>
 
   <!-- Registro -->

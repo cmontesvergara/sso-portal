@@ -31,7 +31,7 @@ export class TwoStepsComponent implements OnInit {
     private readonly authService: AuthService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Get params from query params
@@ -66,7 +66,7 @@ export class TwoStepsComponent implements OnInit {
         this.isLoading = false;
         toast.error('Error al generar OTP', {
           position: 'bottom-right',
-          description: error?.error?.message || 'Intenta nuevamente',
+          description: error?.message || 'Intenta nuevamente',
         });
       }
     });
@@ -133,7 +133,7 @@ export class TwoStepsComponent implements OnInit {
           this.isLoading = false;
           toast.error('Código inválido', {
             position: 'bottom-right',
-            description: error?.error?.message || 'Verifica el código e intenta nuevamente',
+            description: error?.message || 'Verifica el código e intenta nuevamente',
           });
         }
       });

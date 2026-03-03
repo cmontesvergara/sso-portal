@@ -36,6 +36,7 @@ export class SignInComponent implements OnInit {
   form!: FormGroup;
   submitted = false;
   passwordTextType!: boolean;
+  isSubmitting = false;
 
   // SSO Dual Mode
   loginMode: 'direct' | 'app-initiated' = 'direct';
@@ -139,12 +140,14 @@ export class SignInComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
+    this.isSubmitting = true;
     const { nit, password } = this.form.value;
 
     this.authService.signIn(nit, password).subscribe(
       (response: any) => {
         // Check if 2FA is required
         if (response.requiresTwoFactor) {
+          this.isSubmitting = false;
           // Redirect to 2FA validation page with tempToken
           this.router.navigate(['/auth/two-steps'], {
             queryParams: {
@@ -174,6 +177,7 @@ export class SignInComponent implements OnInit {
         this.handlePostLoginRedirect();
       },
       (error) => {
+        this.isSubmitting = false;
         console.log('Error signIn:', error);
 
         // Cuenta no activa → redirigir a verificación de email
@@ -194,7 +198,7 @@ export class SignInComponent implements OnInit {
         }
 
         // Credenciales inválidas
-        if (error?.code === 401 || error?.status === 401) {
+        if (error?.error === 'INVALID_CREDENTIALS') {
           this.form.controls['password'].setErrors({ invalid: true });
           toast.error('Credenciales incorrectas', {
             position: 'bottom-right',
@@ -203,8 +207,17 @@ export class SignInComponent implements OnInit {
           return;
         }
 
+        // Validación fallida (campos inválidos)
+        if (error?.error === 'INVALID_INPUT') {
+          toast.error('Datos inválidos', {
+            position: 'bottom-right',
+            description: 'Verifica que los datos ingresados sean correctos.',
+          });
+          return;
+        }
+
         // Límite de intentos alcanzado
-        if (error?.code === 429 || error?.status === 429) {
+        if (error?.status === 429) {
           toast.error('Demasiados intentos', {
             position: 'bottom-right',
             description: 'Has superado el límite de intentos. Espera unos minutos antes de intentar de nuevo.',
@@ -213,7 +226,7 @@ export class SignInComponent implements OnInit {
         }
 
         // Error de conexión / red
-        if (error?.status === 0 || error?.status === undefined) {
+        if (error?.status === 0) {
           toast.error('Error de conexión', {
             position: 'bottom-right',
             description: 'No se pudo conectar con el servidor. Verifica tu conexión a internet.',
