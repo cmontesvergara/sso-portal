@@ -41,9 +41,18 @@ export class EmailVerificationComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Get userId from query params
+    // Get userId and other data from query params
     this.route.queryParams.subscribe(params => {
       this.encodedUserId = params['userId'] || null;
+
+      if (params['email']) {
+        this.email = params['email'];
+      }
+
+      if (params['codeSent'] === 'true') {
+        this.codeSent = true;
+        this.successMessage = 'Se ha enviado un correo de verificación. Revisa tu bandeja de entrada.';
+      }
     });
   }
 
@@ -106,7 +115,7 @@ export class EmailVerificationComponent implements OnInit {
         this.isVerifying = false;
         this.verifySuccessMessage = '¡Correo verificado exitosamente! Redirigiendo al inicio de sesión...';
         setTimeout(() => {
-          this.router.navigate(['/auth/sign-in']);
+          this.router.navigate(['/auth/sign-in'], { queryParams: { nit: this.email } });
         }, 3000);
       },
       error: (error: any) => {

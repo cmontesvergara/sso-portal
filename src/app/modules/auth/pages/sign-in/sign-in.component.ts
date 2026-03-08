@@ -185,7 +185,7 @@ export class SignInComponent implements OnInit {
           if (encodedUserId) {
             this.loadingService.loading = true;
             this.router.navigate(['/auth/email-verification'], {
-              queryParams: { userId: encodedUserId },
+              queryParams: { userId: encodedUserId, email: nit },
             });
           } else {
             toast.error('Cuenta no activa', {

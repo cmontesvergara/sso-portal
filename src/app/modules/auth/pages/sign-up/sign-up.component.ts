@@ -120,7 +120,7 @@ export class SignUpComponent implements OnInit {
   onSubmit() {
     if (
       this.signUpForm.value.password ===
-        this.signUpForm.value.confirmPassword &&
+      this.signUpForm.value.confirmPassword &&
       this.signUpForm.value.acceptTerms &&
       this.signUpForm.valid
     ) {
@@ -133,20 +133,41 @@ export class SignUpComponent implements OnInit {
       }
 
       const payload = {
-            firstName: this.signUpForm.value.name.trim().toUpperCase(),
-            lastName: this.signUpForm.value.last_name.trim().toUpperCase(),
-            secondLastName: this.signUpForm.value?.second_last_name
-              ?.trim()
-              ?.toUpperCase(),
-            phone: this.signUpForm.value.phone.trim(),
-            email: this.signUpForm.value.email.trim().toLowerCase(),
-            nuid: this.signUpForm.value.nit.trim(),
-            password: this.signUpForm.value.confirmPassword.trim(),
+        firstName: this.signUpForm.value.name.trim().toUpperCase(),
+        lastName: this.signUpForm.value.last_name.trim().toUpperCase(),
+        secondLastName: this.signUpForm.value?.second_last_name
+          ?.trim()
+          ?.toUpperCase(),
+        phone: this.signUpForm.value.phone.trim(),
+        email: this.signUpForm.value.email.trim().toLowerCase(),
+        nuid: this.signUpForm.value.nit.trim(),
+        password: this.signUpForm.value.confirmPassword.trim(),
       };
 
       this.authService.signUp(payload).subscribe(
-        (res) => {
-          this.router.navigate(['/auth/success-sign-up']);
+        (res: any) => {
+          const userId = res?.user?.userId;
+          const email = payload.email;
+
+          if (userId) {
+            this.authService.sendEmailOtpCode(email, userId).subscribe({
+              next: () => {
+                const encodedUserId = btoa(userId);
+                this.router.navigate(['/auth/email-verification'], {
+                  queryParams: { email, userId: encodedUserId, codeSent: 'true' }
+                });
+              },
+              error: () => {
+                // Si falla el envío inicial, redirigir igualmente para que puedan reintentar
+                const encodedUserId = btoa(userId);
+                this.router.navigate(['/auth/email-verification'], {
+                  queryParams: { email, userId: encodedUserId }
+                });
+              }
+            });
+          } else {
+            this.router.navigate(['/auth/sign-in'], { queryParams: { nit: email } });
+          }
         },
         (err) => {
           toast.error('Ocurrio un error.', {
