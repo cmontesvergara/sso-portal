@@ -1,3 +1,3 @@
-<button [disabled]="disabled()" (click)="onButtonClick()" [ngClass]="classes">
+<button [disabled]="disabled()" (click)="onButtonClick()" [ngClass]="classes" [attr.tabindex]="tabIndex()">
   <ng-content></ng-content>
 </button>

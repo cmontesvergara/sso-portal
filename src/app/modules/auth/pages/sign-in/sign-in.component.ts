@@ -62,7 +62,6 @@ export class SignInComponent implements OnInit {
 
     this.form.controls['remember'].valueChanges.subscribe((value) => {
       if (!value) {
-        this.form.reset();
         this.localStorageService.removeRememberLoginCredentials();
       }
     });
@@ -289,8 +288,6 @@ export class SignInComponent implements OnInit {
     }
   }
   toggleRememberButton() {
-    this.form.controls['remember'].patchValue(
-      !this.form.controls['remember'].value,
-    );
+    // Function removed because remember toggle is handled by form valueChanges
   }
 }

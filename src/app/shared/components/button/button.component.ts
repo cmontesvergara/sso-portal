@@ -24,6 +24,7 @@ export class ButtonComponent implements OnInit {
   tone = input<ButtonProps['tone']>('primary');
   shadow = input<ButtonProps['shadow']>('none');
   disabled = input<boolean>(false);
+  tabIndex = input<number>(0);
   full = input(false, {
     transform: (value: boolean | string) => (typeof value === 'string' ? value === '' : value),
   });
