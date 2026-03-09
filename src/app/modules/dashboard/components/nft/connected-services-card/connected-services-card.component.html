@@ -80,9 +80,22 @@
     <!-- Background overlay to close dropdown -->
     <div *ngIf="showDropdown" (click)="showDropdown = false" class="fixed inset-0 z-40 bg-transparent"></div>
 
-    <!-- Loading State -->
-    <div *ngIf="loadingTenants" class="flex justify-center items-center py-12">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    <!-- Loading State (Skeleton) -->
+    <div *ngIf="loadingTenants"
+        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 relative z-10 pt-4">
+        <div *ngFor="let i of [1,2,3,4,5,6,7,8]" class="p-4 border border-border rounded-lg bg-card animate-pulse">
+            <div class="flex items-start mb-3">
+                <div class="w-10 h-10 rounded-lg bg-muted flex-shrink-0 mr-3"></div>
+                <div class="flex-1 space-y-2 py-1">
+                    <div class="h-4 bg-muted rounded w-3/4"></div>
+                    <div class="h-3 bg-muted rounded w-1/2"></div>
+                </div>
+            </div>
+            <div class="space-y-2 mt-6">
+                <div class="h-3 bg-muted rounded w-full"></div>
+                <div class="h-3 bg-muted rounded w-5/6"></div>
+            </div>
+        </div>
     </div>
 
     <!-- No Tenants State -->
@@ -94,27 +107,34 @@
     <div *ngIf="!loadingTenants && activeTenant" class="relative z-10">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
             <div *ngFor="let app of activeTenant.apps" (click)="launchApp(activeTenant.tenantId, app.appId, app.url)"
-                class="group p-4 border border-border rounded-lg bg-background hover:bg-muted/30 transition-all cursor-pointer hover:shadow-sm hover:border-primary">
+                class="group relative p-4 border border-border rounded-lg bg-background hover:bg-card hover:-translate-y-1 hover:shadow-md hover:border-primary hover:ring-1 hover:ring-primary transition-all duration-200 cursor-pointer overflow-hidden">
+
+                <!-- External Link Icon (Appears on Hover) -->
+                <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                </div>
 
                 <div class="flex items-start mb-3">
                     <div
                         class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mr-3 group-hover:bg-primary/20 transition-colors">
                         <span class="text-primary text-lg font-bold">{{ app.name.charAt(0).toUpperCase() }}</span>
                     </div>
-                    <div class="flex-1 min-w-0">
+                    <div class="flex-1 min-w-0 pr-6">
                         <span class="font-semibold text-foreground block truncate">{{ app.name }}</span>
-                        <span
-                            class="text-[10px] text-muted-foreground px-2 py-0.5 mt-0.5 rounded bg-muted inline-block border border-border uppercase tracking-wider">
-                            {{ activeTenant.slug }}
-                        </span>
                     </div>
                 </div>
 
-                <div class="text-sm text-muted-foreground mt-2">
-                    <p class="truncate mb-2" [title]="app.description">{{ app.description || 'Sin descripción' }}</p>
-                    <div class="flex items-center">
-                        <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                        <span class="text-xs font-medium text-foreground">Disponible</span>
+                <div class="text-sm text-muted-foreground mt-4">
+                    <p class="truncate mb-3" [title]="app.description">{{ app.description || 'Sin descripción' }}</p>
+                    <div class="flex items-center text-green-600 dark:text-green-500">
+                        <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="text-xs font-semibold">Disponible</span>
                     </div>
                 </div>
             </div>
