@@ -48,8 +48,9 @@ export class UserManagementService {
             params = params.set('search', search);
         }
 
-        return this.http.get<ListUsersResponse>(`${this.baseUrl}/user/list`, {
+        return this.http.get<ListUsersResponse>(`${this.baseUrl}/api/v1/user/list`, {
             params,
+            withCredentials: true,
         });
     }
 }
