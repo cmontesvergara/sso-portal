@@ -121,6 +121,7 @@ export class Menu {
           route: '/dashboard',
           children: [
             { label: 'Aplicaciones', route: '/dashboard/applications', hidden: false },
+            { label: 'Estadísticas', route: '/dashboard/stats', hidden: false },
             { label: 'Organizaciones', route: '/dashboard/tenants', hidden: false },
             { label: 'Roles', route: '/dashboard/roles', hidden: false },
             { label: 'Usuarios', route: '/dashboard/users', hidden: false },

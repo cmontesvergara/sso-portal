@@ -10,6 +10,7 @@ import { TenantSelectorComponent } from './pages/tenant-selector/tenant-selector
 import { TenantsComponent } from './pages/tenants/tenants.component';
 import { isLoggedGuard } from 'src/app/core/guards/is-logged/is-logged.guard';
 import { UsersComponent } from './pages/users/users.component';
+import { StatsComponent } from './pages/stats/stats.component';
 
 const routes: Routes = [
   {
@@ -27,6 +28,11 @@ const routes: Routes = [
       {
         path: 'users',
         component: UsersComponent,
+        canActivate: [systemAdminGuard],
+      },
+      {
+        path: 'stats',
+        component: StatsComponent,
         canActivate: [systemAdminGuard],
       },
       {

@@ -1,0 +1,97 @@
+<div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+    <div class="sm:flex sm:justify-between sm:items-center mb-8">
+        <div class="mb-4 sm:mb-0">
+            <h1 class="text-2xl md:text-3xl text-gray-800 dark:text-gray-100 font-bold">Resumen de Estadísticas</h1>
+        </div>
+    </div>
+
+    <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+        <svg class="animate-spin h-8 w-8 text-indigo-500" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none">
+            </circle>
+            <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+        </svg>
+        <span class="ml-3 text-gray-600 dark:text-gray-400">Cargando métricas...</span>
+    </div>
+
+    <div *ngIf="error" class="bg-red-50 text-red-500 p-4 rounded-sm border border-red-200 mb-6">
+        {{ error }}
+    </div>
+
+    <div *ngIf="!isLoading && stats" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Total KPI Cards -->
+        <div
+            class="bg-white dark:bg-gray-800 shadow-lg rounded-xl border border-gray-100 dark:border-gray-700 p-6 flex items-center transform transition duration-500 hover:scale-105">
+            <div class="p-4 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500 mr-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                    </path>
+                </svg>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Usuarios Registrados</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.totalUsers }}</p>
+            </div>
+        </div>
+
+        <!-- Active Apps KPI -->
+        <div
+            class="bg-white dark:bg-gray-800 shadow-lg rounded-xl border border-gray-100 dark:border-gray-700 p-6 flex items-center transform transition duration-500 hover:scale-105">
+            <div class="p-4 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-500 mr-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01">
+                    </path>
+                </svg>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Aplicaciones Activas</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.activeApps }} <span
+                        class="text-lg text-gray-400 font-normal">/ {{ stats.totalApps }}</span></p>
+            </div>
+        </div>
+
+        <!-- Active SSO Sessions KPI -->
+        <div
+            class="bg-white dark:bg-gray-800 shadow-lg rounded-xl border border-gray-100 dark:border-gray-700 p-6 flex items-center transform transition duration-500 hover:scale-105">
+            <div class="p-4 rounded-full bg-amber-50 dark:bg-amber-900/30 text-amber-500 mr-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z">
+                    </path>
+                </svg>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Sesiones SSO Activas</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.activeSsoSessions }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="!isLoading && stats" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Chart 1: User Status Donut -->
+        <div
+            class="bg-white dark:bg-gray-800 shadow-lg rounded-xl border border-gray-100 dark:border-gray-700 p-6 pb-2">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Estado de Usuarios</h2>
+            <apx-chart [series]="userStatusChartOptions.series!" [chart]="userStatusChartOptions.chart!"
+                [labels]="userStatusChartOptions.labels" [colors]="userStatusChartOptions.colors"
+                [responsive]="userStatusChartOptions.responsive!" [legend]="userStatusChartOptions.legend!"></apx-chart>
+        </div>
+
+        <!-- Chart 2: Sessions Bar Chart -->
+        <div
+            class="bg-white dark:bg-gray-800 shadow-lg rounded-xl border border-gray-100 dark:border-gray-700 p-6 pb-2">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Concurrencia de Sesiones</h2>
+            <apx-chart [series]="sessionsChartOptions.series!" [chart]="sessionsChartOptions.chart!"
+                [dataLabels]="sessionsChartOptions.dataLabels!" [plotOptions]="sessionsChartOptions.plotOptions!"
+                [yaxis]="sessionsChartOptions.yaxis!" [xaxis]="sessionsChartOptions.xaxis!"
+                [fill]="sessionsChartOptions.fill!" [tooltip]="sessionsChartOptions.tooltip!"
+                [stroke]="sessionsChartOptions.stroke!" [legend]="sessionsChartOptions.legend!"
+                [colors]="sessionsChartOptions.colors!"></apx-chart>
+        </div>
+
+    </div>
+</div>

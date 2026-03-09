@@ -6,6 +6,7 @@ import { DashboardRoutingModule } from './dashboard-routing.module';
 import { ApplicationsComponent } from './pages/applications/applications.component';
 import { TenantsComponent } from './pages/tenants/tenants.component';
 import { UsersComponent } from './pages/users/users.component';
+import { StatsComponent } from './pages/stats/stats.component';
 
 @NgModule({
   imports: [
@@ -15,7 +16,8 @@ import { UsersComponent } from './pages/users/users.component';
 
     ApplicationsComponent, // Import standalone component
     TenantsComponent,
-    UsersComponent // Import standalone component
+    UsersComponent, // Import standalone component
+    StatsComponent
   ],
 })
 export class DashboardModule { }

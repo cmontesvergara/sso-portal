@@ -32,7 +32,11 @@ export class MenuService implements OnDestroy {
               group.items.forEach((item) => {
                 if (item.children) {
                   item.children.forEach((child) => {
-                    if (child.label === 'Aplicaciones' || child.label === 'Usuarios') {
+                    if (
+                      child.label === 'Aplicaciones' ||
+                      child.label === 'Usuarios' ||
+                      child.label === 'Estadísticas'
+                    ) {
                       child.hidden = true;
                     }
                   });
