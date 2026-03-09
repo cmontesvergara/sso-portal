@@ -13,6 +13,7 @@ export class Menu {
           label: 'Administración',
           route: '/dashboard',
           children: [
+            { label: 'Estadísticas', route: '/dashboard/stats', hidden: false },
             { label: 'Aplicaciones', route: '/dashboard/applications', hidden: false },
             { label: 'Organizaciones', route: '/dashboard/tenants', hidden: false },
             { label: 'Usuarios', route: '/dashboard/users', hidden: false },
