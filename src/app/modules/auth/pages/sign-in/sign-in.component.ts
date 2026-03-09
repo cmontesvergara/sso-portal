@@ -68,7 +68,18 @@ export class SignInComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Detect SSO mode from query params
+    // Remember me functionality (Priority 1 - Default)
+    const rememberLoginCredentials =
+      this.localStorageService.getRememberLoginCredentials();
+    if (rememberLoginCredentials) {
+      this.form.patchValue({
+        nit: rememberLoginCredentials.nit,
+        password: rememberLoginCredentials.password,
+        remember: true,
+      });
+    }
+
+    // Detect SSO mode from query params (Priority 2 - Overrides)
     this.route.queryParams.subscribe((params) => {
       this.redirectUri = params['redirect_uri'] || '';
       this.appId = params['app_id'] || '';
@@ -100,23 +111,20 @@ export class SignInComponent implements OnInit {
         console.log(`[SignIn] Login Mode detected: direct`);
       }
 
-      // Auto-fill nit if provided
+      // Auto-fill nit if provided (This overrides remember me)
       const nit = params['nit'];
       if (nit) {
-        this.form.patchValue({ nit });
+        // Only override if the nit from URL is different from remembered, 
+        // or just always override and clear password to be safe
+        setTimeout(() => {
+          this.form.patchValue({
+            nit: nit,
+            password: '' // Clear password if nit comes from URL because it might be a different user
+          });
+          this.form.updateValueAndValidity();
+        }, 0);
       }
     });
-
-    // Remember me functionality
-    const rememberLoginCredentials =
-      this.localStorageService.getRememberLoginCredentials();
-    if (rememberLoginCredentials) {
-      this.form.patchValue({
-        nit: rememberLoginCredentials.nit,
-        password: rememberLoginCredentials.password,
-        remember: true,
-      });
-    }
   }
 
   getAppName(appId: string): string {
