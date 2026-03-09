@@ -5,6 +5,7 @@ import { AngularSvgIconModule } from 'angular-svg-icon';
 import { DashboardRoutingModule } from './dashboard-routing.module';
 import { ApplicationsComponent } from './pages/applications/applications.component';
 import { TenantsComponent } from './pages/tenants/tenants.component';
+import { UsersComponent } from './pages/users/users.component';
 
 @NgModule({
   imports: [
@@ -14,6 +15,7 @@ import { TenantsComponent } from './pages/tenants/tenants.component';
 
     ApplicationsComponent, // Import standalone component
     TenantsComponent,
+    UsersComponent // Import standalone component
   ],
 })
-export class DashboardModule {}
+export class DashboardModule { }
