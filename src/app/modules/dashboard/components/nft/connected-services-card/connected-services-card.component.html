@@ -1,6 +1,7 @@
 <!-- Connected Services Card -->
-<div class="flex-col w-full bg-card border border-border rounded-xl shadow-sm p-6 relative">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 relative z-50">
+<div class="flex-col w-full bg-card p-6 relative">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 relative"
+        [ngClass]="showDropdown ? 'z-50' : 'z-10'">
         <div class="flex flex-wrap items-center gap-3">
             <div class="p-2 bg-primary/10 rounded-lg shrink-0">
                 <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,11 +70,6 @@
                     </ul>
                 </div>
             </div>
-
-            <button (click)="viewAllApps()"
-                class="hidden sm:inline-flex text-sm font-medium text-primary hover:text-primary/80 transition-colors whitespace-nowrap">
-                Ver Todo
-            </button>
         </div>
     </div>
 
@@ -107,7 +103,7 @@
     <div *ngIf="!loadingTenants && activeTenant" class="relative z-10">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
             <div *ngFor="let app of activeTenant.apps" (click)="launchApp(activeTenant.tenantId, app.appId, app.url)"
-                class="group relative p-4 border border-border rounded-lg bg-background hover:bg-card hover:-translate-y-1 hover:shadow-md hover:border-primary hover:ring-1 hover:ring-primary transition-all duration-200 cursor-pointer overflow-hidden">
+                class="group relative p-4 border border-border rounded-lg bg-background hover:-translate-y-1 hover:shadow-md hover:border-primary hover:ring-1 hover:ring-primary transition-all duration-200 cursor-pointer overflow-hidden">
 
                 <!-- External Link Icon (Appears on Hover) -->
                 <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
