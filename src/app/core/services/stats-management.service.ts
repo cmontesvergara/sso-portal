@@ -15,6 +15,12 @@ export interface StatsResponseDTO {
 
     activeSsoSessions: number;
     activeAppSessions: number;
+
+    appSessionsDetails?: Array<{
+        appId: string;
+        appName: string;
+        activeSessions: number;
+    }>;
 }
 
 export interface GetStatsResponse {

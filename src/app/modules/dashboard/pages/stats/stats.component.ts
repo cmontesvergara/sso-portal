@@ -140,11 +140,25 @@ export class StatsComponent implements OnInit {
         };
 
         // 3. Sessions Bar Chart
+        const sessionCategories = ["SSO"];
+        const sessionData = [stats.activeSsoSessions];
+
+        if (stats.appSessionsDetails && stats.appSessionsDetails.length > 0) {
+            stats.appSessionsDetails.forEach(detail => {
+                sessionCategories.push(detail.appName || detail.appId);
+                sessionData.push(detail.activeSessions);
+            });
+        } else {
+            // Fallback if details are not available
+            sessionCategories.push("Aplicaciones Hijas");
+            sessionData.push(stats.activeAppSessions);
+        }
+
         this.sessionsChartOptions = {
             series: [
                 {
                     name: "Sesiones Concurrentes",
-                    data: [stats.activeSsoSessions, stats.activeAppSessions]
+                    data: sessionData
                 }
             ],
             chart: {
@@ -172,7 +186,7 @@ export class StatsComponent implements OnInit {
                 colors: ["transparent"]
             },
             xaxis: {
-                categories: ["SSO Global", "Aplicaciones Hijas"],
+                categories: sessionCategories,
                 labels: {
                     style: {
                         colors: '#6B7280'
