@@ -6,6 +6,7 @@ const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
+    children: [], // Necesario para que sea un nodo de ruta válido al usar solo canActivate
     canActivate: [
       (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
         const router = inject(Router);

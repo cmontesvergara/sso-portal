@@ -19,6 +19,7 @@ export class TenantSelectorComponent implements OnInit {
   tenants: TenantWithApps[] = [];
   redirectUri: string = '';
   appId: string = '';
+  isEmbedded: boolean = false;
   loading = true;
   selecting = false;
 
@@ -34,6 +35,7 @@ export class TenantSelectorComponent implements OnInit {
     // Get query params
     this.redirectUri = this.route.snapshot.queryParams['redirect_uri'] || '';
     this.appId = this.route.snapshot.queryParams['app_id'] || '';
+    this.isEmbedded = this.route.snapshot.queryParams['embedded'] === 'true';
 
     console.log(`[TenantSelector] Query params -> redirectUri: ${this.redirectUri}, appId: ${this.appId}`);
 
@@ -96,8 +98,29 @@ export class TenantSelectorComponent implements OnInit {
       .subscribe({
         next: (response) => {
           console.log(`[TenantSelector] Authorization success, redirecting to: ${response.redirectUri}`);
-          // Redirect to app with auth code
-          window.location.href = response.redirectUri;
+          // Redirect to app with auth code or postMessage if embedded
+          if (this.isEmbedded) {
+            try {
+              const urlObj = new URL(response.redirectUri);
+              const code = urlObj.searchParams.get('code');
+              if (code) {
+                const codeBase64 = btoa(code);
+                console.log(`[TenantSelector] Embedded mode: sending sso-success via postMessage`);
+                window.parent.postMessage({
+                  v: "1.0",
+                  source: "@bigso/sso-iframe",
+                  type: "sso-success",
+                  payload: { codeBase64 }
+                }, "*");
+              } else {
+                console.error("[TenantSelector] No auth code found in redirectUrl for embedded mode.");
+              }
+            } catch (e) {
+              console.error("[TenantSelector] Error parsing redirectUri for embedded mode", e);
+            }
+          } else {
+            window.location.href = response.redirectUri;
+          }
         },
         error: (err) => {
           console.error('Error authorizing:', err);

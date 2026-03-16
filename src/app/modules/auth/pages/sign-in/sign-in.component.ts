@@ -44,6 +44,7 @@ export class SignInComponent implements OnInit {
   appId: string = '';
   tenantId: string = '';
   appName: string = '';
+  isEmbedded: boolean = false;
 
   constructor(
     private readonly _formBuilder: FormBuilder,
@@ -84,6 +85,7 @@ export class SignInComponent implements OnInit {
       this.redirectUri = params['redirect_uri'] || '';
       this.appId = params['app_id'] || '';
       this.tenantId = params['tenant_id'] || '';
+      this.isEmbedded = params['embedded'] === 'true';
 
       console.log(`[SignIn] Query Params -> redirectUri: ${this.redirectUri}, appId: ${this.appId}, tenantId: ${this.tenantId}`);
 
@@ -160,10 +162,10 @@ export class SignInComponent implements OnInit {
             queryParams: {
               token: response.tempToken,
               validate: 'true',
-              // Preserve SSO params for after 2FA
               ...(this.redirectUri && { redirect_uri: this.redirectUri }),
               ...(this.appId && { app_id: this.appId }),
-              ...(this.tenantId && { tenant_id: this.tenantId })
+              ...(this.tenantId && { tenant_id: this.tenantId }),
+              ...(this.isEmbedded && { embedded: 'true' })
             }
           });
           return;
@@ -269,7 +271,29 @@ export class SignInComponent implements OnInit {
         this.authService.authorize(this.tenantId, this.appId, this.redirectUri).subscribe({
           next: (response) => {
             console.log(`[SignIn] Authorization success. Redirecting to:`, response.redirectUri);
-            window.location.href = response.redirectUri;
+            if (this.isEmbedded) {
+              try {
+                // Extraer el 'code' de la url de respuesta
+                const urlObj = new URL(response.redirectUri);
+                const code = urlObj.searchParams.get('code');
+                if (code) {
+                  const codeBase64 = btoa(code);
+                  console.log(`[SignIn] Embedded mode: sending sso-success via postMessage`);
+                  window.parent.postMessage({
+                    v: "1.0",
+                    source: "@bigso/sso-iframe",
+                    type: "sso-success",
+                    payload: { codeBase64 }
+                  }, "*"); // Emite a cualquier origin (la app padre lo valida)
+                } else {
+                  console.error("[SignIn] No auth code found in redirectUrl for embedded mode.");
+                }
+              } catch (e) {
+                console.error("[SignIn] Error parsing redirectUri for embedded mode", e);
+              }
+            } else {
+              window.location.href = response.redirectUri;
+            }
           },
           error: (err) => {
             console.error('[SignIn] Error authorizing:', err);
@@ -284,7 +308,8 @@ export class SignInComponent implements OnInit {
         this.router.navigate(['/dashboard/select-tenant'], {
           queryParams: {
             redirect_uri: this.redirectUri,
-            app_id: this.appId
+            app_id: this.appId,
+            ...(this.isEmbedded && { embedded: 'true' })
           }
         });
       }
