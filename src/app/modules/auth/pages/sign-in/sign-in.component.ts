@@ -94,11 +94,14 @@ export class SignInComponent implements OnInit {
     // Detect SSO mode from query params (Priority 2 - Overrides)
     this.route.queryParams.subscribe((params) => {
       this.redirectUri = params['redirect_uri'] || '';
-      this.appId = params['app_id'] || '';
+      this.appId = params['app_id'] || params['client_id'] || '';
       this.tenantId = params['tenant_id'] || '';
-      this.isEmbedded = params['embedded'] === 'true';
+      // v2.3: detect embedded via iframe context (v + client_id in URL)
+      // v1.0 fallback: explicit embedded=true param
+      this.isEmbedded = params['embedded'] === 'true'
+        || (params['v'] === '2.3' && !!params['client_id'] && window !== window.parent);
 
-      console.log(`[SignIn] Query Params -> redirectUri: ${this.redirectUri}, appId: ${this.appId}, tenantId: ${this.tenantId}`);
+      console.log(`[SignIn] Query Params -> redirectUri: ${this.redirectUri}, appId: ${this.appId}, tenantId: ${this.tenantId}, isEmbedded: ${this.isEmbedded}`);
 
       // If redirected by guard, extract from returnUrl
       const returnUrl = params['returnUrl'];
