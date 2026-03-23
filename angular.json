@@ -69,7 +69,7 @@
               ],
               "outputHashing": "all"
             },
-            "development": {
+            "develop": {
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true,
@@ -105,14 +105,14 @@
             "production": {
               "buildTarget": "sso-portal:build:production"
             },
-            "development": {
-              "buildTarget": "sso-portal:build:development"
+            "develop": {
+              "buildTarget": "sso-portal:build:develop"
             },
             "qa": {
               "buildTarget": "sso-portal:build:qa"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "develop"
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
