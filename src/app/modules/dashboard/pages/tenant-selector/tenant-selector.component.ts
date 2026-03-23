@@ -93,30 +93,62 @@ export class TenantSelectorComponent implements OnInit {
     this.selecting = true;
     console.log(`[TenantSelector] Authorizing for tenantId: ${tenantId}, appId: ${this.appId}, redirectUri: ${this.redirectUri}`);
 
+    // Read PKCE context if available (v2.3, set by sign-in)
+    const pkceRaw = sessionStorage.getItem('sso_pkce_ctx');
+    let pkce: any = undefined;
+    if (pkceRaw) {
+      const pkceCtx = JSON.parse(pkceRaw);
+      pkce = {
+        codeChallenge: pkceCtx.codeChallenge,
+        codeChallengeMethod: pkceCtx.codeChallengeMethod,
+        state: pkceCtx.state,
+        nonce: pkceCtx.nonce,
+      };
+    }
+
     this.authService
-      .authorize(tenantId, this.appId, this.redirectUri)
+      .authorize(tenantId, this.appId, this.redirectUri, pkce)
       .subscribe({
         next: (response) => {
           console.log(`[TenantSelector] Authorization success, redirecting to: ${response.redirectUri}`);
           // Redirect to app with auth code or postMessage if embedded
           if (this.isEmbedded) {
             try {
-              const urlObj = new URL(response.redirectUri);
-              const code = urlObj.searchParams.get('code');
-              if (code) {
-                const codeBase64 = btoa(code);
-                console.log(`[TenantSelector] Embedded mode: sending sso-success via postMessage`);
+              if (pkceRaw && response.signedPayload) {
+                // v2.3: Send real signed JWS from SSO Core
+                const pkceCtx = JSON.parse(pkceRaw);
+                console.log(`[TenantSelector] Embedded mode: sending sso-success v2.3`);
+                const targetOrigin = pkceCtx.origin || '*';
                 window.parent.postMessage({
-                  v: "1.0",
-                  source: "@bigso/sso-iframe",
-                  type: "sso-success",
-                  payload: { codeBase64 }
-                }, "*");
+                  v: '2.3',
+                  source: '@bigso/sso-iframe',
+                  type: 'sso-success',
+                  requestId: pkceCtx.requestId,
+                  payload: {
+                    state: pkceCtx.state,
+                    signed_payload: response.signedPayload,
+                  }
+                }, targetOrigin);
+                sessionStorage.removeItem('sso_pkce_ctx');
               } else {
-                console.error("[TenantSelector] No auth code found in redirectUrl for embedded mode.");
+                // v1.0 legacy
+                const urlObj = new URL(response.redirectUri);
+                const code = urlObj.searchParams.get('code');
+                if (code) {
+                  const codeBase64 = btoa(code);
+                  console.log(`[TenantSelector] Embedded mode: sending sso-success v1.0`);
+                  window.parent.postMessage({
+                    v: '1.0',
+                    source: '@bigso/sso-iframe',
+                    type: 'sso-success',
+                    payload: { codeBase64 }
+                  }, '*');
+                } else {
+                  console.error("[TenantSelector] No auth code found in redirectUrl for embedded mode.");
+                }
               }
             } catch (e) {
-              console.error("[TenantSelector] Error parsing redirectUri for embedded mode", e);
+              console.error("[TenantSelector] Error in embedded success", e);
             }
           } else {
             window.location.href = response.redirectUri;

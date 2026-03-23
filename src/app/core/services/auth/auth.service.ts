@@ -34,6 +34,7 @@ export interface AuthorizeResponse {
   success: boolean;
   authCode: string;
   redirectUri: string;
+  signedPayload?: string; // v2.3: JWS signed payload (only when PKCE params were sent)
 }
 
 @Injectable({
@@ -114,10 +115,16 @@ export class AuthService {
     tenantId: string,
     appId: string,
     redirectUri: string,
+    pkce?: {
+      codeChallenge?: string;
+      codeChallengeMethod?: string;
+      state?: string;
+      nonce?: string;
+    },
   ): Observable<AuthorizeResponse> {
     return this.http.post<AuthorizeResponse>(
       `${this.baseUrl}/api/v1/auth/authorize`,
-      { tenantId, appId, redirectUri },
+      { tenantId, appId, redirectUri, ...pkce },
       { withCredentials: true },
     );
   }

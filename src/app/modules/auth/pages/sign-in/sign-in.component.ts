@@ -46,6 +46,17 @@ export class SignInComponent implements OnInit {
   appName: string = '';
   isEmbedded: boolean = false;
 
+  // v2.3 PKCE context (populated by sso-init message from SDK)
+  private pkceContext: {
+    state?: string;
+    nonce?: string;
+    codeChallenge?: string;
+    codeChallengeMethod?: string;
+    origin?: string;
+    requestId?: string;
+  } = {};
+  private protocolVersion = '1.0';
+
   constructor(
     private readonly _formBuilder: FormBuilder,
     private readonly router: Router,
@@ -125,6 +136,50 @@ export class SignInComponent implements OnInit {
           });
           this.form.updateValueAndValidity();
         }, 0);
+      }
+    });
+
+    // v2.3: Setup postMessage listener and emit sso-ready if embedded
+    if (this.isEmbedded) {
+      this.setupPostMessageListener();
+      this.emitSsoReady();
+    }
+  }
+
+  /**
+   * v2.3: Emit sso-ready to parent window (SDK)
+   */
+  private emitSsoReady() {
+    console.log('[SignIn] Emitting sso-ready to parent');
+    window.parent.postMessage({
+      v: '2.3',
+      source: '@bigso/sso-iframe',
+      type: 'sso-ready',
+    }, '*');
+  }
+
+  /**
+   * v2.3: Listen for sso-init from SDK to capture PKCE params
+   */
+  private setupPostMessageListener() {
+    window.addEventListener('message', (event: MessageEvent) => {
+      const msg = event.data;
+      if (!msg || typeof msg !== 'object') return;
+
+      // Only process messages from the SDK
+      if (msg.source !== '@app/widget') return;
+
+      if (msg.type === 'sso-init' && msg.v === '2.3') {
+        console.log('[SignIn] sso-init received (v2.3)', msg.payload);
+        this.protocolVersion = '2.3';
+        this.pkceContext = {
+          state: msg.payload?.state,
+          nonce: msg.payload?.nonce,
+          codeChallenge: msg.payload?.code_challenge,
+          codeChallengeMethod: msg.payload?.code_challenge_method,
+          origin: msg.payload?.origin,
+          requestId: msg.requestId,
+        };
       }
     });
   }
@@ -267,30 +322,19 @@ export class SignInComponent implements OnInit {
       // App-initiated flow
       if (this.tenantId) {
         console.log(`[SignIn] Tenant ID present (${this.tenantId}), bypassing selector. Authorizing...`);
-        // Tenant already specified, generate auth code directly
-        this.authService.authorize(this.tenantId, this.appId, this.redirectUri).subscribe({
+        // Build PKCE params if v2.3
+        const pkce = this.protocolVersion === '2.3' ? {
+          codeChallenge: this.pkceContext.codeChallenge,
+          codeChallengeMethod: this.pkceContext.codeChallengeMethod,
+          state: this.pkceContext.state,
+          nonce: this.pkceContext.nonce,
+        } : undefined;
+
+        this.authService.authorize(this.tenantId, this.appId, this.redirectUri, pkce).subscribe({
           next: (response) => {
             console.log(`[SignIn] Authorization success. Redirecting to:`, response.redirectUri);
             if (this.isEmbedded) {
-              try {
-                // Extraer el 'code' de la url de respuesta
-                const urlObj = new URL(response.redirectUri);
-                const code = urlObj.searchParams.get('code');
-                if (code) {
-                  const codeBase64 = btoa(code);
-                  console.log(`[SignIn] Embedded mode: sending sso-success via postMessage`);
-                  window.parent.postMessage({
-                    v: "1.0",
-                    source: "@bigso/sso-iframe",
-                    type: "sso-success",
-                    payload: { codeBase64 }
-                  }, "*"); // Emite a cualquier origin (la app padre lo valida)
-                } else {
-                  console.error("[SignIn] No auth code found in redirectUrl for embedded mode.");
-                }
-              } catch (e) {
-                console.error("[SignIn] Error parsing redirectUri for embedded mode", e);
-              }
+              this.sendEmbeddedSuccess(response);
             } else {
               window.location.href = response.redirectUri;
             }
@@ -305,6 +349,10 @@ export class SignInComponent implements OnInit {
       } else {
         console.log(`[SignIn] Navigating to tenant-selector with app_id=${this.appId}, redirect_uri=${this.redirectUri}`);
         // Go to tenant selector
+        // Persist PKCE context for tenant-selector if v2.3
+        if (this.protocolVersion === '2.3') {
+          sessionStorage.setItem('sso_pkce_ctx', JSON.stringify(this.pkceContext));
+        }
         this.router.navigate(['/dashboard/select-tenant'], {
           queryParams: {
             redirect_uri: this.redirectUri,
@@ -320,7 +368,51 @@ export class SignInComponent implements OnInit {
       this.router.navigateByUrl(returnUrl);
     }
   }
+
+  /**
+   * Send embedded success via postMessage.
+   * Supports both v1.0 (codeBase64) and v2.3 (signedPayload JWS) protocols.
+   */
+  private sendEmbeddedSuccess(response: any) {
+    try {
+      if (this.protocolVersion === '2.3' && response.signedPayload) {
+        // v2.3: Send signed JWS payload from SSO Core
+        console.log('[SignIn] Embedded mode: sending sso-success v2.3 with signedPayload');
+        const targetOrigin = this.pkceContext.origin || '*';
+        window.parent.postMessage({
+          v: '2.3',
+          source: '@bigso/sso-iframe',
+          type: 'sso-success',
+          requestId: this.pkceContext.requestId,
+          payload: {
+            state: this.pkceContext.state,
+            signed_payload: response.signedPayload,
+          }
+        }, targetOrigin);
+      } else {
+        // v1.0 legacy: Send Base64 encoded code
+        const urlObj = new URL(response.redirectUri);
+        const code = urlObj.searchParams.get('code');
+        if (!code) {
+          console.error('[SignIn] No auth code found in redirectUrl for embedded mode.');
+          return;
+        }
+        const codeBase64 = btoa(code);
+        console.log('[SignIn] Embedded mode: sending sso-success v1.0');
+        window.parent.postMessage({
+          v: '1.0',
+          source: '@bigso/sso-iframe',
+          type: 'sso-success',
+          payload: { codeBase64 }
+        }, '*');
+      }
+    } catch (e) {
+      console.error('[SignIn] Error in sendEmbeddedSuccess', e);
+    }
+  }
+
   toggleRememberButton() {
     // Function removed because remember toggle is handled by form valueChanges
   }
 }
+
