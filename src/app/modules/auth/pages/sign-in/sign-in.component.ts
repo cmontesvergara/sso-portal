@@ -180,6 +180,15 @@ export class SignInComponent implements OnInit {
           origin: msg.payload?.origin,
           requestId: msg.requestId,
         };
+
+        // Force app-initiated mode: the SDK is driving the flow
+        this.loginMode = 'app-initiated';
+        // Derive redirectUri from sso-init payload if not already set
+        if (!this.redirectUri) {
+          this.redirectUri = msg.payload?.redirect_uri || msg.payload?.origin || '';
+        }
+        this.appName = this.getAppName(this.appId);
+        console.log(`[SignIn] Forced app-initiated mode. redirectUri: ${this.redirectUri}, appId: ${this.appId}`);
       }
     });
   }
