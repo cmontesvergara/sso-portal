@@ -9,6 +9,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, Subject, throwError } from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 import { SessionStorageService } from '../services/session-storage/session-storage.service';
 import { AuthService } from '../services/auth/auth.service';
 
@@ -28,9 +29,10 @@ export class AuthV2Interceptor implements HttpInterceptor {
     next: HttpHandler,
   ): Observable<HttpEvent<any>> {
     const accessToken = this.sessionStorageService.getV2AccessToken();
+    const isV2Mode = this.sessionStorageService.isV2AuthMode();
 
     let authReq = req;
-    if (accessToken && this.isV2Request(req)) {
+    if (accessToken && isV2Mode && this.isSameOrigin(req)) {
       authReq = req.clone({
         setHeaders: {
           Authorization: `Bearer ${accessToken}`,
@@ -43,7 +45,8 @@ export class AuthV2Interceptor implements HttpInterceptor {
         if (
           error.status === 401 &&
           accessToken &&
-          this.isV2Request(req) &&
+          isV2Mode &&
+          this.isSameOrigin(req) &&
           !req.url.includes('/auth/refresh') &&
           !req.url.includes('/auth/login')
         ) {
@@ -55,8 +58,8 @@ export class AuthV2Interceptor implements HttpInterceptor {
     );
   }
 
-  private isV2Request(req: HttpRequest<any>): boolean {
-    return req.url.includes('/api/v2/');
+  private isSameOrigin(req: HttpRequest<any>): boolean {
+    return req.url.startsWith(environment.baseUrl);
   }
 
   private handle401Error(
