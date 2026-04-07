@@ -4,7 +4,6 @@ import { Observable, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { SystemRole, TenantWithApps, UserProfile } from '../../models';
 
-// Re-export for backwards compatibility
 export { SystemRole, TenantWithApps, UserProfile };
 
 export interface SignInResponse {
@@ -34,7 +33,59 @@ export interface AuthorizeResponse {
   success: boolean;
   authCode: string;
   redirectUri: string;
-  signedPayload?: string; // v2.3: JWS signed payload (only when PKCE params were sent)
+  signedPayload?: string;
+}
+
+export interface LoginV2Response {
+  success: boolean;
+  tokens: {
+    accessToken: string;
+    expiresIn: number;
+  };
+  user: {
+    userId: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    systemRole: SystemRole;
+  };
+}
+
+export interface AuthorizeV2Response {
+  success: boolean;
+  code: string;
+  expiresIn: number;
+  redirectUri: string;
+  state?: string;
+}
+
+export interface ExchangeV2Response {
+  success: boolean;
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
+    expiresIn: number;
+  };
+  user: {
+    userId: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+  tenant: {
+    tenantId: string;
+    name: string;
+    slug: string;
+    role: string;
+  };
+}
+
+export interface RefreshV2Response {
+  success: boolean;
+  tokens: {
+    accessToken: string;
+    expiresIn: number;
+  };
 }
 
 @Injectable({
@@ -42,13 +93,14 @@ export interface AuthorizeResponse {
 })
 export class AuthService {
   baseUrl = environment.baseUrl;
+
+  private get v2BaseUrl(): string {
+    return `${this.baseUrl}/api/v2/auth`;
+  }
+
   constructor(private readonly http: HttpClient) {}
 
-  /**
-   * Sign in - creates SSO session cookie
-   */
   signIn(emailOrNuid: string, password: string): Observable<SignInResponse> {
-    // Detect if it's an email or nuid
     const isEmail = emailOrNuid.includes('@');
     const payload = isEmail
       ? { email: emailOrNuid, password }
@@ -61,18 +113,12 @@ export class AuthService {
     );
   }
 
-  /**
-   * Sign up new user
-   */
   signUp(values: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/api/v1/auth/signup`, values, {
       withCredentials: true,
     });
   }
 
-  /**
-   * Get current user profile (authenticated with SSO cookie)
-   */
   getProfile(): Observable<{ success: boolean; user: UserProfile }> {
     return this.http.get<{ success: boolean; user: UserProfile }>(
       `${this.baseUrl}/api/v1/user/profile`,
@@ -80,9 +126,6 @@ export class AuthService {
     );
   }
 
-  /**
-   * Update current user profile (authenticated with SSO cookie)
-   */
   updateProfile(
     profileData: Partial<UserProfile>,
   ): Observable<{ success: boolean; message: string; user: UserProfile }> {
@@ -95,9 +138,6 @@ export class AuthService {
     });
   }
 
-  /**
-   * Get user tenants with apps
-   */
   getUserTenants(): Observable<{
     success: boolean;
     tenants: TenantWithApps[];
@@ -108,9 +148,6 @@ export class AuthService {
     );
   }
 
-  /**
-   * Generate authorization code for app access
-   */
   authorize(
     tenantId: string,
     appId: string,
@@ -129,22 +166,14 @@ export class AuthService {
     );
   }
 
-  /**
-   * Logout - clears SSO session
-   */
   logout(): Observable<any> {
     return this.http
       .post(`${this.baseUrl}/api/v1/auth/logout`, {}, { withCredentials: true })
       .pipe(
-        tap(() => {
-          // Cookie cleared by backend
-        }),
+        tap(() => {}),
       );
   }
 
-  /**
-   * Password recovery
-   */
   sendEmailRecovery(nit: string): Observable<any> {
     return this.http.post(
       `${this.baseUrl}/api/v1/auth/forgot-password`,
@@ -161,9 +190,6 @@ export class AuthService {
     );
   }
 
-  /**
-   * Email verification
-   */
   sendEmailOtpCode(email: string, userId: string): Observable<any> {
     return this.http.post(
       `${this.baseUrl}/api/v1/email-verification/send`,
@@ -180,9 +206,6 @@ export class AuthService {
     );
   }
 
-  /**
-   * 2FA/TOTP methods
-   */
   generateOTP(userId: string, name: string): Observable<any> {
     return this.http.post(
       `${this.baseUrl}/api/v1/otp/generate`,
@@ -211,5 +234,66 @@ export class AuthService {
     return this.http.get(`${this.baseUrl}/api/v1/otp/status/${userId}`, {
       withCredentials: true,
     });
+  }
+
+  // ============================================================
+  // V2 API Methods (Redis-backed, JWT Bearer + PKCE)
+  // ============================================================
+
+  loginV2(emailOrNuid: string, password: string): Observable<LoginV2Response> {
+    const isEmail = emailOrNuid.includes('@');
+    const payload = isEmail
+      ? { email: emailOrNuid, password }
+      : { nuid: emailOrNuid, password };
+
+    return this.http.post<LoginV2Response>(
+      `${this.v2BaseUrl}/login`,
+      payload,
+      { withCredentials: true },
+    );
+  }
+
+  authorizeV2(
+    tenantId: string,
+    appId: string,
+    redirectUri: string,
+    codeChallenge: string,
+    codeChallengeMethod: string = 'S256',
+    state?: string,
+    nonce?: string,
+  ): Observable<AuthorizeV2Response> {
+    return this.http.post<AuthorizeV2Response>(
+      `${this.v2BaseUrl}/authorize`,
+      { tenantId, appId, redirectUri, codeChallenge, codeChallengeMethod, state, nonce },
+      { withCredentials: true },
+    );
+  }
+
+  exchangeV2(
+    code: string,
+    appId: string,
+    codeVerifier: string,
+  ): Observable<ExchangeV2Response> {
+    return this.http.post<ExchangeV2Response>(
+      `${this.v2BaseUrl}/exchange`,
+      { code, appId, codeVerifier },
+      { withCredentials: true },
+    );
+  }
+
+  refreshV2(): Observable<RefreshV2Response> {
+    return this.http.post<RefreshV2Response>(
+      `${this.v2BaseUrl}/refresh`,
+      {},
+      { withCredentials: true },
+    );
+  }
+
+  logoutV2(revokeAll: boolean = false): Observable<any> {
+    return this.http.post(
+      `${this.v2BaseUrl}/logout`,
+      { revokeAll },
+      { withCredentials: true },
+    );
   }
 }

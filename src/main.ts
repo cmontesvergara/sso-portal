@@ -6,6 +6,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app/app-routing.module';
 import { AppComponent } from './app/app.component';
 import { ErrorInterceptor } from './app/core/interceptor/error.interceptor';
+import { AuthV2Interceptor } from './app/core/interceptor/auth-v2.interceptor';
 import { environment } from './environments/environment';
 
 if (environment.production) {
@@ -22,6 +23,7 @@ bootstrapApplication(AppComponent, {
     provideAnimations(),
     provideHttpClient(withInterceptorsFromDi()),
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: AuthV2Interceptor, multi: true },
   ],
 }).catch((err) => console.error(err));
 

@@ -1,5 +1,6 @@
 import { NgClass, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { environment } from 'src/environments/environment';
 import {
   FormBuilder,
   FormGroup,
@@ -9,6 +10,7 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AngularSvgIconModule } from 'angular-svg-icon';
+import { Observable } from 'rxjs';
 import { toast } from 'ngx-sonner';
 import { AuthService } from 'src/app/core/services/auth/auth.service';
 import { LoadingService } from 'src/app/core/services/loading/loading.service';
@@ -219,12 +221,17 @@ export class SignInComponent implements OnInit {
     this.isSubmitting = true;
     const { nit, password } = this.form.value;
 
-    this.authService.signIn(nit, password).subscribe(
+    const useV2 = environment.useV2Auth;
+
+    const loginObs: Observable<any> = useV2
+      ? this.authService.loginV2(nit, password)
+      : this.authService.signIn(nit, password);
+
+    loginObs.subscribe(
       (response: any) => {
         // Check if 2FA is required
         if (response.requiresTwoFactor) {
           this.isSubmitting = false;
-          // Redirect to 2FA validation page with tempToken
           this.router.navigate(['/auth/two-steps'], {
             queryParams: {
               token: response.tempToken,
@@ -232,14 +239,17 @@ export class SignInComponent implements OnInit {
               ...(this.redirectUri && { redirect_uri: this.redirectUri }),
               ...(this.appId && { app_id: this.appId }),
               ...(this.tenantId && { tenant_id: this.tenantId }),
-              ...(this.isEmbedded && { embedded: 'true' })
+              ...(this.isEmbedded && { embedded: 'true' }),
+              ...(useV2 && { v2: 'true' }),
             }
           });
           return;
         }
 
-        // SSO cookie already set by backend
-        // No need to save tokens in sessionStorage anymore
+        if (useV2 && response.tokens?.accessToken) {
+          this.sessionStorageService.saveV2AccessToken(response.tokens.accessToken);
+          this.sessionStorageService.setV2AuthMode(true);
+        }
 
         // Remember me functionality (optional)
         if (this.form.controls['remember'].value) {
@@ -249,10 +259,9 @@ export class SignInComponent implements OnInit {
           });
         }
 
-        // Post-login redirect based on mode
         this.handlePostLoginRedirect();
       },
-      (error) => {
+      (error: any) => {
         this.isSubmitting = false;
         console.log('Error signIn:', error);
 
@@ -330,38 +339,61 @@ export class SignInComponent implements OnInit {
 
   handlePostLoginRedirect() {
     console.log(`[SignIn] handlePostLoginRedirect called. Mode: ${this.loginMode}`);
+    const useV2 = environment.useV2Auth;
+
     if (this.loginMode === 'app-initiated') {
-      // App-initiated flow
       if (this.tenantId) {
         console.log(`[SignIn] Tenant ID present (${this.tenantId}), bypassing selector. Authorizing...`);
-        // Build PKCE params if v2.3
-        const pkce = this.protocolVersion === '2.3' ? {
-          codeChallenge: this.pkceContext.codeChallenge,
-          codeChallengeMethod: this.pkceContext.codeChallengeMethod,
-          state: this.pkceContext.state,
-          nonce: this.pkceContext.nonce,
-        } : undefined;
 
-        this.authService.authorize(this.tenantId, this.appId, this.redirectUri, pkce).subscribe({
-          next: (response) => {
-            console.log(`[SignIn] Authorization success. Redirecting to:`, response.redirectUri);
-            if (this.isEmbedded) {
-              this.sendEmbeddedSuccess(response);
-            } else {
-              window.location.href = response.redirectUri;
+        if (useV2 && this.pkceContext.codeChallenge) {
+          this.authService.authorizeV2(
+            this.tenantId,
+            this.appId,
+            this.redirectUri,
+            this.pkceContext.codeChallenge || '',
+            this.pkceContext.codeChallengeMethod || 'S256',
+            this.pkceContext.state,
+            this.pkceContext.nonce,
+          ).subscribe({
+            next: (response) => {
+              console.log(`[SignIn] V2 Authorization success. Code:`, response.code);
+              const redirectUrl = `${this.redirectUri}?code=${response.code}${response.state ? '&state=' + response.state : ''}`;
+              if (this.isEmbedded) {
+                this.sendEmbeddedSuccess(response);
+              } else {
+                window.location.href = redirectUrl;
+              }
+            },
+            error: (err) => {
+              console.error('[SignIn] Error authorizing (v2):', err);
+              toast.error('Error al autorizar acceso', { position: 'bottom-right' });
             }
-          },
-          error: (err) => {
-            console.error('[SignIn] Error authorizing:', err);
-            toast.error('Error al autorizar acceso', {
-              position: 'bottom-right'
-            });
-          }
-        });
+          });
+        } else {
+          const pkce = this.protocolVersion === '2.3' ? {
+            codeChallenge: this.pkceContext.codeChallenge,
+            codeChallengeMethod: this.pkceContext.codeChallengeMethod,
+            state: this.pkceContext.state,
+            nonce: this.pkceContext.nonce,
+          } : undefined;
+
+          this.authService.authorize(this.tenantId, this.appId, this.redirectUri, pkce).subscribe({
+            next: (response) => {
+              console.log(`[SignIn] Authorization success. Redirecting to:`, response.redirectUri);
+              if (this.isEmbedded) {
+                this.sendEmbeddedSuccess(response);
+              } else {
+                window.location.href = response.redirectUri;
+              }
+            },
+            error: (err) => {
+              console.error('[SignIn] Error authorizing:', err);
+              toast.error('Error al autorizar acceso', { position: 'bottom-right' });
+            }
+          });
+        }
       } else {
         console.log(`[SignIn] Navigating to tenant-selector with app_id=${this.appId}, redirect_uri=${this.redirectUri}`);
-        // Go to tenant selector
-        // Persist PKCE context for tenant-selector if v2.3
         if (this.protocolVersion === '2.3') {
           sessionStorage.setItem('sso_pkce_ctx', JSON.stringify(this.pkceContext));
         }
@@ -374,7 +406,6 @@ export class SignInComponent implements OnInit {
         });
       }
     } else {
-      // Direct login - go to returnUrl or SSO dashboard
       const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
       console.log(`[SignIn] Direct login logic. Navigating to returnUrl:`, returnUrl);
       this.router.navigateByUrl(returnUrl);

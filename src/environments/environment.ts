@@ -7,6 +7,7 @@ export const environment = {
   production: false,
   baseUrl: 'http://localhost:3000',
   //baseUrl: 'http://sso.msoft.uno',
+  useV2Auth: true,
 };
 
 /*
