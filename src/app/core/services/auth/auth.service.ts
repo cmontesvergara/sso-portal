@@ -57,6 +57,7 @@ export interface AuthorizeV2Response {
   expiresIn: number;
   redirectUri: string;
   state?: string;
+  signedPayload?: string;
 }
 
 export interface ExchangeV2Response {
@@ -259,12 +260,13 @@ export class AuthService {
     redirectUri: string,
     codeChallenge: string,
     codeChallengeMethod: string = 'S256',
+    codeVerifier?: string,
     state?: string,
     nonce?: string,
   ): Observable<AuthorizeV2Response> {
     return this.http.post<AuthorizeV2Response>(
       `${this.v2BaseUrl}/authorize`,
-      { tenantId, appId, redirectUri, codeChallenge, codeChallengeMethod, state, nonce },
+      { tenantId, appId, redirectUri, codeChallenge, codeChallengeMethod, codeVerifier, state, nonce },
       { withCredentials: true },
     );
   }

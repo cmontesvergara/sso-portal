@@ -6,11 +6,12 @@ import {
   trigger,
 } from '@angular/animations';
 import { NgClass, TitleCasePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { AvatarModule } from 'ngx-avatars';
 import { AuthService } from 'src/app/core/services/auth/auth.service';
+import { SessionStorageService } from 'src/app/core/services/session-storage/session-storage.service';
 import { ThemeService } from '../../../../../core/services/theme/theme.service';
 import { ClickOutsideDirective } from '../../../../../shared/directives/click-outside.directive';
 
@@ -91,6 +92,7 @@ export class ProfileMenuComponent implements OnInit {
   constructor(
     public themeService: ThemeService,
     private readonly authService: AuthService,
+    private readonly sessionStorageService: SessionStorageService,
     private readonly router: Router,
   ) {
     this.authService.getProfile().subscribe((res) => {
@@ -120,12 +122,17 @@ export class ProfileMenuComponent implements OnInit {
   }
 
   logout() {
-    this.authService.logout().subscribe({
+    const isV2 = this.sessionStorageService.isV2AuthMode();
+    const logout$ = isV2 ? this.authService.logoutV2(true) : this.authService.logout();
+
+    logout$.subscribe({
       next: () => {
+        this.sessionStorageService.clearAll();
         this.router.navigate(['/auth/sign-in']);
       },
       error: (err) => {
         console.error('Logout error:', err);
+        this.sessionStorageService.clearAll();
         this.router.navigate(['/auth/sign-in']);
       }
     });

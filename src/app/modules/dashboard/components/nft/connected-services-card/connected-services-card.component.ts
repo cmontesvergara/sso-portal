@@ -6,6 +6,7 @@ import {
     TenantWithApps,
 } from 'src/app/core/services/auth/auth.service';
 import { LoadingService } from 'src/app/core/services/loading/loading.service';
+import { generateCodeVerifier, generateCodeChallenge } from 'src/app/core/utils/pkce';
 
 import { FormsModule } from '@angular/forms';
 
@@ -83,17 +84,29 @@ export class ConnectedServicesCardComponent implements OnInit {
         });
     }
 
-    launchApp(tenantId: string, appId: string, appUrl: string) {
-        const redirectUri = `${appUrl}/auth/callback`;
-        this.authService.authorize(tenantId, appId, redirectUri).subscribe({
-            next: (response) => {
-                window.location.href = response.redirectUri;
-            },
-            error: (err) => {
-                console.error('Error launching app:', err);
-                alert('Error al lanzar aplicación');
-            },
-        });
+    async launchApp(tenantId: string, appId: string, appUrl: string) {
+        try {
+            const redirectUri = `${appUrl}/auth/callback`;
+            const codeVerifier = await generateCodeVerifier();
+            const codeChallenge = await generateCodeChallenge(codeVerifier);
+
+            this.authService.authorizeV2(tenantId, appId, redirectUri, codeChallenge, 'S256', codeVerifier).subscribe({
+                next: (response) => {
+                    if (response.signedPayload) {
+                        window.location.href = `${redirectUri}?payload=${encodeURIComponent(response.signedPayload)}`;
+                    } else {
+                        window.location.href = response.redirectUri;
+                    }
+                },
+                error: (err) => {
+                    console.error('Error launching app:', err);
+                    alert('Error al lanzar aplicación');
+                },
+            });
+        } catch (err) {
+            console.error('PKCE generation error:', err);
+            alert('Error al lanzar aplicación');
+        }
     }
 
     viewAllApps() {

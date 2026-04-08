@@ -7,6 +7,7 @@ import {
   TenantWithApps,
 } from 'src/app/core/services/auth/auth.service';
 import { RouterModule } from '@angular/router';
+import { generateCodeVerifier, generateCodeChallenge } from 'src/app/core/utils/pkce';
 
 @Component({
   selector: 'app-tenant-selector',
@@ -32,7 +33,6 @@ export class TenantSelectorComponent implements OnInit {
 
   ngOnInit() {
     console.log('[TenantSelector] ngOnInit invoked');
-    // Get query params
     this.redirectUri = this.route.snapshot.queryParams['redirect_uri'] || '';
     this.appId = this.route.snapshot.queryParams['app_id'] || '';
     this.isEmbedded = this.route.snapshot.queryParams['embedded'] === 'true';
@@ -41,7 +41,6 @@ export class TenantSelectorComponent implements OnInit {
 
     if (!this.redirectUri || !this.appId) {
       console.log('[TenantSelector] Missing redirectUri or appId, navigating to /dashboard');
-      // If no redirect params, go to dashboard
       this.router.navigate(['/dashboard']);
       return;
     }
@@ -54,7 +53,6 @@ export class TenantSelectorComponent implements OnInit {
     this.userService.getUserTenants().subscribe({
       next: (response) => {
         console.log('[TenantSelector] Response from getUserTenants:', response);
-        // Filter tenants by app access
         if (this.appId) {
           this.tenants = response.tenants.filter((t) =>
             t.apps.some((app) => app.appId === this.appId),
@@ -67,7 +65,6 @@ export class TenantSelectorComponent implements OnInit {
 
         this.loading = false;
 
-        // Auto-select if only one tenant
         if (this.tenants.length === 1) {
           console.log('[TenantSelector] Only 1 tenant found, auto-selecting:', this.tenants[0].tenantId);
           this.selectTenant(this.tenants[0].tenantId);
@@ -87,37 +84,34 @@ export class TenantSelectorComponent implements OnInit {
     });
   }
 
-  selectTenant(tenantId: string) {
+  async selectTenant(tenantId: string) {
     if (this.selecting) return;
 
     this.selecting = true;
     console.log(`[TenantSelector] Authorizing for tenantId: ${tenantId}, appId: ${this.appId}, redirectUri: ${this.redirectUri}`);
 
-    // Read PKCE context if available (v2.3, set by sign-in)
     const pkceRaw = sessionStorage.getItem('sso_pkce_ctx');
-    let pkce: any = undefined;
+    let codeChallenge: string;
+    let codeVerifier: string | undefined;
+
     if (pkceRaw) {
       const pkceCtx = JSON.parse(pkceRaw);
-      pkce = {
-        codeChallenge: pkceCtx.codeChallenge,
-        codeChallengeMethod: pkceCtx.codeChallengeMethod,
-        state: pkceCtx.state,
-        nonce: pkceCtx.nonce,
-      };
+      codeChallenge = pkceCtx.codeChallenge;
+    } else {
+      codeVerifier = await generateCodeVerifier();
+      codeChallenge = await generateCodeChallenge(codeVerifier);
     }
 
     this.authService
-      .authorize(tenantId, this.appId, this.redirectUri, pkce)
+      .authorizeV2(tenantId, this.appId, this.redirectUri, codeChallenge, 'S256', codeVerifier)
       .subscribe({
         next: (response) => {
           console.log(`[TenantSelector] Authorization success, redirecting to: ${response.redirectUri}`);
-          // Redirect to app with auth code or postMessage if embedded
           if (this.isEmbedded) {
             try {
               if (pkceRaw && response.signedPayload) {
-                // v2.3: Send real signed JWS from SSO Core
                 const pkceCtx = JSON.parse(pkceRaw);
-                console.log(`[TenantSelector] Embedded mode: sending sso-success v2.3`);
+                console.log(`[TenantSelector] Embedded mode (iframe): sending sso-success with signed_payload`);
                 const targetOrigin = pkceCtx.origin || '*';
                 window.parent.postMessage({
                   v: '2.3',
@@ -130,28 +124,20 @@ export class TenantSelectorComponent implements OnInit {
                   }
                 }, targetOrigin);
                 sessionStorage.removeItem('sso_pkce_ctx');
+              } else if (response.signedPayload) {
+                window.location.href = `${this.redirectUri}?payload=${encodeURIComponent(response.signedPayload)}`;
               } else {
-                // v1.0 legacy
-                const urlObj = new URL(response.redirectUri);
-                const code = urlObj.searchParams.get('code');
-                if (code) {
-                  const codeBase64 = btoa(code);
-                  console.log(`[TenantSelector] Embedded mode: sending sso-success v1.0`);
-                  window.parent.postMessage({
-                    v: '1.0',
-                    source: '@bigso/sso-iframe',
-                    type: 'sso-success',
-                    payload: { codeBase64 }
-                  }, '*');
-                } else {
-                  console.error("[TenantSelector] No auth code found in redirectUrl for embedded mode.");
-                }
+                window.location.href = response.redirectUri;
               }
             } catch (e) {
               console.error("[TenantSelector] Error in embedded success", e);
             }
           } else {
-            window.location.href = response.redirectUri;
+            if (response.signedPayload) {
+              window.location.href = `${this.redirectUri}?payload=${encodeURIComponent(response.signedPayload)}`;
+            } else {
+              window.location.href = response.redirectUri;
+            }
           }
         },
         error: (err) => {
