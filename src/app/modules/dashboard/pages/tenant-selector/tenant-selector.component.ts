@@ -93,17 +93,21 @@ export class TenantSelectorComponent implements OnInit {
     const pkceRaw = sessionStorage.getItem('sso_pkce_ctx');
     let codeChallenge: string;
     let codeVerifier: string | undefined;
+    let state: string | undefined;
+    let nonce: string | undefined;
 
     if (pkceRaw) {
       const pkceCtx = JSON.parse(pkceRaw);
       codeChallenge = pkceCtx.codeChallenge;
+      state = pkceCtx.state;
+      nonce = pkceCtx.nonce;
     } else {
       codeVerifier = await generateCodeVerifier();
       codeChallenge = await generateCodeChallenge(codeVerifier);
     }
 
     this.authService
-      .authorizeV2(tenantId, this.appId, this.redirectUri, codeChallenge, 'S256', codeVerifier)
+      .authorizeV2(tenantId, this.appId, this.redirectUri, codeChallenge, 'S256', codeVerifier, state, nonce)
       .subscribe({
         next: (response) => {
           console.log(`[TenantSelector] Authorization success, redirecting to: ${response.redirectUri}`);
