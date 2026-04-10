@@ -254,6 +254,10 @@ export class AuthService {
     );
   }
 
+  /**
+   * @deprecated El flujo redirect (launchApp) será eliminado en favor del flujo iframe.
+   * Las apps satélites usarán @bigso/auth-sdk/browser para autenticación.
+   */
   authorizeV2(
     tenantId: string,
     appId: string,

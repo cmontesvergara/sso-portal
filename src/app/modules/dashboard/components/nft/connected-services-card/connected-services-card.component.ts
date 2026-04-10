@@ -10,6 +10,11 @@ import { generateCodeVerifier, generateCodeChallenge } from 'src/app/core/utils/
 
 import { FormsModule } from '@angular/forms';
 
+/**
+ * @deprecated Este componente será eliminado en una futura iteración.
+ * El dashboard de apps se moverá a una app satélite que usará el SDK iframe.
+ * No realizar nuevas funcionalidades aquí.
+ */
 @Component({
     selector: 'app-connected-services-card',
     templateUrl: './connected-services-card.component.html',
