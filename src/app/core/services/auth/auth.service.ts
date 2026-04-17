@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { SystemRole, TenantWithApps, UserProfile } from '../../models';
+import { SessionStorageService } from '../session-storage/session-storage.service';
 
 export { SystemRole, TenantWithApps, UserProfile };
 
@@ -18,6 +19,14 @@ export interface SignInResponse {
   };
   accessToken: string;
   refreshToken: string;
+}
+
+export interface LoginV2Request {
+  email?: string;
+  nuid?: string;
+  password: string;
+  appId: string;
+  tenantId: string;
 }
 
 export interface Address {
@@ -38,10 +47,8 @@ export interface AuthorizeResponse {
 
 export interface LoginV2Response {
   success: boolean;
-  tokens: {
-    accessToken: string;
-    expiresIn: number;
-  };
+  ssoToken: string;
+  expiresIn: number;
   user: {
     userId: string;
     email: string;
@@ -49,6 +56,8 @@ export interface LoginV2Response {
     lastName: string;
     systemRole: SystemRole;
   };
+  requiresTwoFactor?: boolean;
+  tempToken?: string;
 }
 
 export interface AuthorizeV2Response {
@@ -99,8 +108,14 @@ export class AuthService {
     return `${this.baseUrl}/api/v2/auth`;
   }
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly sessionStorageService: SessionStorageService,
+  ) {}
 
+  /**
+   * @deprecated Use loginV2() instead. v1 signin will be removed on 2026-05-01
+   */
   signIn(emailOrNuid: string, password: string): Observable<SignInResponse> {
     const isEmail = emailOrNuid.includes('@');
     const payload = isEmail
@@ -167,11 +182,16 @@ export class AuthService {
     );
   }
 
+  /**
+   * @deprecated Use logoutV2() instead. v1 logout will be removed on 2026-05-01
+   */
   logout(): Observable<any> {
     return this.http
       .post(`${this.baseUrl}/api/v1/auth/logout`, {}, { withCredentials: true })
       .pipe(
-        tap(() => {}),
+        tap(() => {
+          this.sessionStorageService.clearAll();
+        }),
       );
   }
 
@@ -241,16 +261,34 @@ export class AuthService {
   // V2 API Methods (Redis-backed, JWT Bearer + PKCE)
   // ============================================================
 
-  loginV2(emailOrNuid: string, password: string): Observable<LoginV2Response> {
+  /**
+   * Login con email o NUID + password
+   * Guarda el token en sessionStorage para el interceptor
+   */
+  loginV2(
+    emailOrNuid: string,
+    password: string,
+    appId: string = environment.appId || 'sso-portal',
+    tenantId: string = environment.tenantId || 'tenant-default',
+  ): Observable<LoginV2Response> {
     const isEmail = emailOrNuid.includes('@');
-    const payload = isEmail
-      ? { email: emailOrNuid, password }
-      : { nuid: emailOrNuid, password };
+    const payload: LoginV2Request = {
+      ...(isEmail ? { email: emailOrNuid } : { nuid: emailOrNuid }),
+      password,
+      appId,
+      tenantId,
+    };
 
     return this.http.post<LoginV2Response>(
       `${this.v2BaseUrl}/login`,
       payload,
-      { withCredentials: true },
+    ).pipe(
+      tap((response) => {
+        if (response.ssoToken) {
+          this.sessionStorageService.saveV2AccessToken(response.ssoToken);
+          this.sessionStorageService.setV2AuthMode(true);
+        }
+      }),
     );
   }
 
@@ -295,11 +333,25 @@ export class AuthService {
     );
   }
 
+  /**
+   * Logout v2 con Bearer token
+   * Limpia sessionStorage y revoca sesión en SSO
+   */
   logoutV2(revokeAll: boolean = false): Observable<any> {
+    const accessToken = this.sessionStorageService.getV2AccessToken();
+
     return this.http.post(
       `${this.v2BaseUrl}/logout`,
       { revokeAll },
-      { withCredentials: true },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    ).pipe(
+      tap(() => {
+        this.sessionStorageService.clearAll();
+      }),
     );
   }
 }

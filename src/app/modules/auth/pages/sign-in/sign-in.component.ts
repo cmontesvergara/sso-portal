@@ -222,9 +222,11 @@ export class SignInComponent implements OnInit {
     const { nit, password } = this.form.value;
 
     const useV2 = environment.useV2Auth;
+    const appId = this.appId || environment.appId || 'sso-portal';
+    const tenantId = this.tenantId || environment.tenantId || 'tenant-default';
 
     const loginObs: Observable<any> = useV2
-      ? this.authService.loginV2(nit, password)
+      ? this.authService.loginV2(nit, password, appId, tenantId)
       : this.authService.signIn(nit, password);
 
     loginObs.subscribe(
@@ -246,10 +248,7 @@ export class SignInComponent implements OnInit {
           return;
         }
 
-        if (useV2 && response.tokens?.accessToken) {
-          this.sessionStorageService.saveV2AccessToken(response.tokens.accessToken);
-          this.sessionStorageService.setV2AuthMode(true);
-        }
+        // Token ya guardado por authService.loginV2() vía tap()
 
         // Remember me functionality (optional)
         if (this.form.controls['remember'].value) {

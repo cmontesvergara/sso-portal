@@ -8,6 +8,8 @@ export const environment = {
   baseUrl: 'http://localhost:3001',
   //baseUrl: 'http://sso.msoft.uno',
   useV2Auth: true,
+  appId: 'sso-portal',
+  tenantId: 'tenant-default',
 };
 
 /*
