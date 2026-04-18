@@ -5,7 +5,7 @@
 
 export const environment = {
   production: false,
-  baseUrl: 'http://localhost:3001',
+  baseUrl: 'https://sso.bigso.test',
   //baseUrl: 'http://sso.msoft.uno',
   useV2Auth: true,
   appId: 'sso-portal',

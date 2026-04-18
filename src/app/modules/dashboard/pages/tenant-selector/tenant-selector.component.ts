@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { UserService } from 'src/app/core/services/user/user.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   AuthService,
   TenantWithApps,
 } from 'src/app/core/services/auth/auth.service';
-import { RouterModule } from '@angular/router';
-import { generateCodeVerifier, generateCodeChallenge } from 'src/app/core/utils/pkce';
+import { UserService } from 'src/app/core/services/user/user.service';
+import { generateCodeChallenge, generateCodeVerifier } from 'src/app/core/utils/pkce';
 
 @Component({
   selector: 'app-tenant-selector',
@@ -45,7 +44,8 @@ export class TenantSelectorComponent implements OnInit {
       return;
     }
 
-    this.loadTenants();
+    // this.loadTenants();
+    this.selectTenant('0593fd40-96ab-4547-95c2-43a1ffb6412a')
   }
 
   loadTenants() {
