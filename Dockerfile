@@ -15,7 +15,7 @@ RUN npm install
 COPY . .
 
 # Construir la aplicación Angular para producción
-RUN npm run build -- --configuration develop
+RUN npm run build -- --configuration production
 
 # Etapa 2: Configuración del servidor
 FROM public.ecr.aws/nginx/nginx:stable-alpine
