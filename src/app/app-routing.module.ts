@@ -1,5 +1,5 @@
 import { inject, NgModule } from '@angular/core';
-import { ActivatedRouteSnapshot, Router, RouterModule, Routes, RouterStateSnapshot } from '@angular/router';
+import { ActivatedRouteSnapshot, Router, RouterModule, RouterStateSnapshot, Routes } from '@angular/router';
 import { isLoggedGuard } from './core/guards/is-logged/is-logged.guard';
 
 const routes: Routes = [

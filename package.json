@@ -8,7 +8,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --open",
-    "start:local": "ng serve --port 3001 --host 0.0.0.0 --disable-host-check",
+    "start:local": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" ng serve --port 3001 --host 0.0.0.0 --disable-host-check",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",

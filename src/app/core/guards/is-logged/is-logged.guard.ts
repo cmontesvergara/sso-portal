@@ -9,6 +9,7 @@ export const isLoggedGuard: CanActivateFn = async (route, state) => {
   const router = inject(Router);
   const sessionStorageService = inject(SessionStorageService);
 
+
   try {
     console.log('[isLoggedGuard] Checking session for url:', state.url);
 

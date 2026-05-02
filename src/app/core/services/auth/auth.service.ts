@@ -47,7 +47,8 @@ export interface AuthorizeResponse {
 
 export interface LoginV2Response {
   success: boolean;
-  ssoToken: string;
+  accessToken: string;
+  refreshToken: string;
   expiresIn: number;
   user: {
     userId: string;
@@ -111,7 +112,7 @@ export class AuthService {
   constructor(
     private readonly http: HttpClient,
     private readonly sessionStorageService: SessionStorageService,
-  ) {}
+  ) { }
 
   /**
    * @deprecated Use loginV2() instead. v1 signin will be removed on 2026-05-01
@@ -137,7 +138,7 @@ export class AuthService {
 
   getProfile(): Observable<{ success: boolean; user: UserProfile }> {
     return this.http.get<{ success: boolean; user: UserProfile }>(
-      `${this.baseUrl}/api/v1/user/profile`,
+      `${this.baseUrl}/api/v2/user/profile`,
       { withCredentials: true },
     );
   }
@@ -284,8 +285,8 @@ export class AuthService {
       payload,
     ).pipe(
       tap((response) => {
-        if (response.ssoToken) {
-          this.sessionStorageService.saveV2AccessToken(response.ssoToken);
+        if (response.accessToken) {
+          this.sessionStorageService.saveV2AccessToken(response.accessToken);
           this.sessionStorageService.setV2AuthMode(true);
         }
       }),
