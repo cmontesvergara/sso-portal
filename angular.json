@@ -90,7 +90,7 @@
               ],
               "outputHashing": "all"
             },
-            "qa": {
+            "local": {
               "budgets": [
                 {
                   "type": "initial",
@@ -106,7 +106,7 @@
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.qa.ts"
+                  "with": "src/environments/environment.local.ts"
                 }
               ],
               "outputHashing": "all"
@@ -123,11 +123,11 @@
             "develop": {
               "buildTarget": "sso-portal:build:develop"
             },
-            "qa": {
-              "buildTarget": "sso-portal:build:qa"
+            "local": {
+              "buildTarget": "sso-portal:build:local"
             }
           },
-          "defaultConfiguration": "develop"
+          "defaultConfiguration": "local"
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
