@@ -7,6 +7,7 @@ import {
 } from 'src/app/core/services/auth/auth.service';
 import { UserService } from 'src/app/core/services/user/user.service';
 import { generateCodeChallenge, generateCodeVerifier } from 'src/app/core/utils/pkce';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-tenant-selector',
@@ -45,7 +46,7 @@ export class TenantSelectorComponent implements OnInit {
     }
 
     // this.loadTenants();
-    this.selectTenant('0593fd40-96ab-4547-95c2-43a1ffb6412a')
+    this.selectTenant(environment.tenantId || '6615ba1e-73ee-4c6c-a689-2a8359253988');
   }
 
   loadTenants() {
