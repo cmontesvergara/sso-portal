@@ -56,6 +56,8 @@ export class SignInComponent implements OnInit {
     codeChallengeMethod?: string;
     origin?: string;
     requestId?: string;
+    /** tenantId sent by the SDK via BigsoAuthOptions.tenantId */
+    tenantId?: string;
   } = {};
   private protocolVersion = '1.0';
 
@@ -184,6 +186,8 @@ export class SignInComponent implements OnInit {
           codeChallengeMethod: msg.payload?.code_challenge_method,
           origin: msg.payload?.origin,
           requestId: msg.requestId,
+          // Capture tenantId sent by the SDK (BigsoAuthOptions.tenantId)
+          tenantId: msg.payload?.tenantId,
         };
 
         // Force app-initiated mode: the SDK is driving the flow
@@ -193,7 +197,9 @@ export class SignInComponent implements OnInit {
           this.redirectUri = msg.payload?.redirect_uri || msg.payload?.origin || '';
         }
         this.appName = this.getAppName(this.appId);
-        console.log(`[SignIn] Forced app-initiated mode. redirectUri: ${this.redirectUri}, appId: ${this.appId}`);
+        console.log(
+          `[SignIn] Forced app-initiated mode. redirectUri: ${this.redirectUri}, appId: ${this.appId}, tenantId: ${this.pkceContext.tenantId}`
+        );
       }
     });
   }
@@ -340,74 +346,98 @@ export class SignInComponent implements OnInit {
     console.log(`[SignIn] handlePostLoginRedirect called. Mode: ${this.loginMode}`);
     const useV2 = environment.useV2Auth;
 
+    // ── SDK-initiated flow ────────────────────────────────────────────────────
+    // tenantId is always resolved: SDK sends it via sso-init → fallback to env default.
+    // The tenant-selector is NOT used in this path.
     if (this.loginMode === 'app-initiated') {
-      if (this.tenantId) {
-        console.log(`[SignIn] Tenant ID present (${this.tenantId}), bypassing selector. Authorizing...`);
+      const tenantId =
+        this.pkceContext.tenantId ||   // SDK sent tenantId via BigsoAuthOptions.tenantId
+        this.tenantId ||               // tenantId from URL query param
+        environment.tenantId;          // env default (always present)
 
-        if (useV2 && this.pkceContext.codeChallenge) {
-          this.authService.authorizeV2(
-            this.tenantId,
-            this.appId,
-            this.redirectUri,
-            this.pkceContext.codeChallenge || '',
-            this.pkceContext.codeChallengeMethod || 'S256',
-            this.pkceContext.state,
-            this.pkceContext.nonce,
-          ).subscribe({
-            next: (response) => {
-              console.log(`[SignIn] V2 Authorization success. Code:`, response.code);
-              const redirectUrl = `${this.redirectUri}?code=${response.code}${response.state ? '&state=' + response.state : ''}`;
-              if (this.isEmbedded) {
-                this.sendEmbeddedSuccess(response);
-              } else {
-                window.location.href = redirectUrl;
-              }
-            },
-            error: (err) => {
-              console.error('[SignIn] Error authorizing (v2):', err);
-              toast.error('Error al autorizar acceso', { position: 'bottom-right' });
-            }
-          });
-        } else {
-          const pkce = this.protocolVersion === '2.3' ? {
-            codeChallenge: this.pkceContext.codeChallenge,
-            codeChallengeMethod: this.pkceContext.codeChallengeMethod,
-            state: this.pkceContext.state,
-            nonce: this.pkceContext.nonce,
-          } : undefined;
+      console.log(`[SignIn] SDK flow → tenantId resolved: ${tenantId}, appId: ${this.appId}`);
 
-          this.authService.authorize(this.tenantId, this.appId, this.redirectUri, pkce).subscribe({
-            next: (response) => {
-              console.log(`[SignIn] Authorization success. Redirecting to:`, response.redirectUri);
-              if (this.isEmbedded) {
-                this.sendEmbeddedSuccess(response);
-              } else {
-                window.location.href = response.redirectUri;
-              }
-            },
-            error: (err) => {
-              console.error('[SignIn] Error authorizing:', err);
-              toast.error('Error al autorizar acceso', { position: 'bottom-right' });
+      if (useV2 && this.pkceContext.codeChallenge) {
+        // v2.3 PKCE flow
+        this.authService.authorizeV2(
+          tenantId,
+          this.appId,
+          this.redirectUri,
+          this.pkceContext.codeChallenge,
+          this.pkceContext.codeChallengeMethod || 'S256',
+          undefined,           // codeVerifier stays in the browser (PKCE S256)
+          this.pkceContext.state,
+          this.pkceContext.nonce,
+        ).subscribe({
+          next: (response) => {
+            console.log(`[SignIn] V2 Authorization success. Code:`, response.code);
+            if (this.isEmbedded) {
+              this.sendEmbeddedSuccess(response);
+            } else {
+              const redirectUrl =
+                `${this.redirectUri}?code=${response.code}` +
+                (response.state ? `&state=${response.state}` : '');
+              window.location.href = redirectUrl;
             }
-          });
-        }
+          },
+          error: (err) => {
+            console.error('[SignIn] Error authorizing (v2):', err);
+            toast.error('Error al autorizar acceso', { position: 'bottom-right' });
+          },
+        });
       } else {
-        console.log(`[SignIn] Navigating to tenant-selector with app_id=${this.appId}, redirect_uri=${this.redirectUri}`);
-        if (this.protocolVersion === '2.3') {
-          sessionStorage.setItem('sso_pkce_ctx', JSON.stringify(this.pkceContext));
-        }
-        this.router.navigate(['/dashboard/select-tenant'], {
-          queryParams: {
-            redirect_uri: this.redirectUri,
-            app_id: this.appId,
-            ...(this.isEmbedded && { embedded: 'true' })
-          }
+        // v1.0 legacy PKCE (no codeChallenge from sso-init)
+        const pkce = this.protocolVersion === '2.3' ? {
+          codeChallenge: this.pkceContext.codeChallenge,
+          codeChallengeMethod: this.pkceContext.codeChallengeMethod,
+          state: this.pkceContext.state,
+          nonce: this.pkceContext.nonce,
+        } : undefined;
+
+        this.authService.authorize(tenantId, this.appId, this.redirectUri, pkce).subscribe({
+          next: (response) => {
+            console.log(`[SignIn] Authorization success. Redirecting to:`, response.redirectUri);
+            if (this.isEmbedded) {
+              this.sendEmbeddedSuccess(response);
+            } else {
+              window.location.href = response.redirectUri;
+            }
+          },
+          error: (err) => {
+            console.error('[SignIn] Error authorizing:', err);
+            toast.error('Error al autorizar acceso', { position: 'bottom-right' });
+          },
         });
       }
+
+    // ── Direct login (no SDK) ─────────────────────────────────────────────────
+    // Behaves like the tenant-selector: runs authorize with env defaults and
+    // redirects to the app. /dashboard is deprecated.
     } else {
-      const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
-      console.log(`[SignIn] Direct login logic. Navigating to returnUrl:`, returnUrl);
-      this.router.navigateByUrl(returnUrl);
+      const tenantId = environment.tenantId;
+      const appId    = environment.appId;
+      const redirectUri = environment.appRedirectUri;
+
+      console.log(`[SignIn] Direct login → authorizing with env defaults. tenantId: ${tenantId}, appId: ${appId}`);
+
+      this.authService.authorizeV2(
+        tenantId,
+        appId,
+        redirectUri,
+        // No PKCE for direct login — the portal itself handles the session via cookies
+        '', 'S256', undefined, undefined, undefined,
+      ).subscribe({
+        next: (response) => {
+          console.log('[SignIn] Direct login authorized. Redirecting to app...');
+          window.location.href = response.redirectUri || redirectUri;
+        },
+        error: (err) => {
+          // Fallback: if authorize fails (e.g. no session), stay in portal
+          console.error('[SignIn] Direct login authorize failed:', err);
+          const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+          this.router.navigateByUrl(returnUrl);
+        },
+      });
     }
   }
 

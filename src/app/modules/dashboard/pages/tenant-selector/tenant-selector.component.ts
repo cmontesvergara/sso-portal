@@ -20,6 +20,7 @@ export class TenantSelectorComponent implements OnInit {
   tenants: TenantWithApps[] = [];
   redirectUri: string = '';
   appId: string = '';
+  tenantId: string = '';
   isEmbedded: boolean = false;
   loading = true;
   selecting = false;
@@ -36,8 +37,9 @@ export class TenantSelectorComponent implements OnInit {
     this.redirectUri = this.route.snapshot.queryParams['redirect_uri'] || '';
     this.appId = this.route.snapshot.queryParams['app_id'] || '';
     this.isEmbedded = this.route.snapshot.queryParams['embedded'] === 'true';
+    this.tenantId = this.route.snapshot.queryParams['tenant_id'] || '';
 
-    console.log(`[TenantSelector] Query params -> redirectUri: ${this.redirectUri}, appId: ${this.appId}`);
+    console.log(`[TenantSelector] Query params -> redirectUri: ${this.redirectUri}, appId: ${this.appId}, tenantId: ${this.tenantId}`);
 
     if (!this.redirectUri || !this.appId) {
       console.log('[TenantSelector] Missing redirectUri or appId, navigating to /dashboard');
@@ -46,44 +48,10 @@ export class TenantSelectorComponent implements OnInit {
     }
 
     // this.loadTenants();
-    this.selectTenant(environment.tenantId || '6615ba1e-73ee-4c6c-a689-2a8359253988');
+    this.selectTenant(this.tenantId || environment.tenantId);
   }
 
-  loadTenants() {
-    console.log('[TenantSelector] Calling userService.getUserTenants()');
-    this.userService.getUserTenants().subscribe({
-      next: (response) => {
-        console.log('[TenantSelector] Response from getUserTenants:', response);
-        if (this.appId) {
-          this.tenants = response.tenants.filter((t) =>
-            t.apps.some((app) => app.appId === this.appId),
-          );
-          console.log(`[TenantSelector] Filtered tenants for appId ${this.appId}:`, this.tenants);
-        } else {
-          this.tenants = response.tenants;
-          console.log('[TenantSelector] All tenants (no appId filter):', this.tenants);
-        }
 
-        this.loading = false;
-
-        if (this.tenants.length === 1) {
-          console.log('[TenantSelector] Only 1 tenant found, auto-selecting:', this.tenants[0].tenantId);
-          this.selectTenant(this.tenants[0].tenantId);
-        } else if (this.tenants.length === 0) {
-          console.warn('[TenantSelector] No tenants found with access to this app. Redirecting to /dashboard');
-          alert('No tienes acceso a esta aplicación');
-          this.router.navigate(['/dashboard']);
-        } else {
-          console.log('[TenantSelector] Multiple tenants found, waiting for user selection.');
-        }
-      },
-      error: (err) => {
-        console.error('Error loading tenants:', err);
-        this.loading = false;
-        alert('Error al cargar organizaciones');
-      },
-    });
-  }
 
   async selectTenant(tenantId: string) {
     if (this.selecting) return;
