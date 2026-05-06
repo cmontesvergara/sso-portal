@@ -1,6 +1,5 @@
 import { inject, NgModule } from '@angular/core';
 import { ActivatedRouteSnapshot, Router, RouterModule, RouterStateSnapshot, Routes } from '@angular/router';
-import { isLoggedGuard } from './core/guards/is-logged/is-logged.guard';
 
 const routes: Routes = [
   {
@@ -32,20 +31,8 @@ const routes: Routes = [
     loadChildren: () =>
       import('./modules/auth/auth.module').then((m) => m.AuthModule),
   },
-  {
-    path: 'dashboard/select-tenant',
-    canActivate: [isLoggedGuard],
-    loadComponent: () =>
-      import('./modules/dashboard/pages/tenant-selector/tenant-selector.component').then((m) => m.TenantSelectorComponent),
-  },
-  {
-    path: 'dashboard',
-    canActivateChild: [isLoggedGuard],
-    loadChildren: () =>
-      import('./modules/logged-layout/logged-layout.module').then(
-        (m) => m.LoggedLayoutModule,
-      ),
-  },
+
+
 
   {
     path: 'errors',
