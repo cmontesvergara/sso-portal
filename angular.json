@@ -70,12 +70,6 @@
               "outputHashing": "all"
             },
             "develop": {
-              "optimization": false,
-              "extractLicenses": false,
-              "sourceMap": true,
-              "namedChunks": true
-            },
-            "qa": {
               "budgets": [
                 {
                   "type": "initial",
@@ -91,7 +85,28 @@
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.qa.ts"
+                  "with": "src/environments/environment.develop.ts"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "local": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "4mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "150kb",
+                  "maximumError": "150kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.local.ts"
                 }
               ],
               "outputHashing": "all"
@@ -108,11 +123,11 @@
             "develop": {
               "buildTarget": "sso-portal:build:develop"
             },
-            "qa": {
-              "buildTarget": "sso-portal:build:qa"
+            "local": {
+              "buildTarget": "sso-portal:build:local"
             }
           },
-          "defaultConfiguration": "develop"
+          "defaultConfiguration": "local"
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",

@@ -3,11 +3,16 @@
 // The list of file replacements can be found in `angular.json`.
 
 
-export const environment = {
+export const environment: any = {
   production: false,
-  baseUrl: 'http://localhost:3000',
-  //baseUrl: 'http://sso.msoft.uno',
+  baseUrl: 'https://sso.bigso.test',
+  useV2Auth: true,
+  appId: 'sso-portal',
+  tenantId: '0593fd40-96ab-4547-95c2-43a1ffb6412a',
+  /** Target app URL for direct (non-SDK) login. User is redirected here after authorize. */
+  appRedirectUri: 'https://sso.bigso.test/auth/callback',
 };
+
 
 /*
  * For easier debugging in development mode, you can import the following file

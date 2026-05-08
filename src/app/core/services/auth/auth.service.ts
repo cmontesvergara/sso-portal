@@ -3,8 +3,8 @@ import { Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { SystemRole, TenantWithApps, UserProfile } from '../../models';
+import { SessionStorageService } from '../session-storage/session-storage.service';
 
-// Re-export for backwards compatibility
 export { SystemRole, TenantWithApps, UserProfile };
 
 export interface SignInResponse {
@@ -21,6 +21,14 @@ export interface SignInResponse {
   refreshToken: string;
 }
 
+export interface LoginV2Request {
+  email?: string;
+  nuid?: string;
+  password: string;
+  appId: string;
+  tenantId: string;
+}
+
 export interface Address {
   id: string;
   country: string;
@@ -34,6 +42,61 @@ export interface AuthorizeResponse {
   success: boolean;
   authCode: string;
   redirectUri: string;
+  signedPayload?: string;
+}
+
+export interface LoginV2Response {
+  success: boolean;
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  user: {
+    userId: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    systemRole: SystemRole;
+  };
+  requiresTwoFactor?: boolean;
+  tempToken?: string;
+}
+
+export interface AuthorizeV2Response {
+  success: boolean;
+  code: string;
+  expiresIn: number;
+  redirectUri: string;
+  state?: string;
+  signedPayload?: string;
+}
+
+export interface ExchangeV2Response {
+  success: boolean;
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
+    expiresIn: number;
+  };
+  user: {
+    userId: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+  tenant: {
+    tenantId: string;
+    name: string;
+    slug: string;
+    role: string;
+  };
+}
+
+export interface RefreshV2Response {
+  success: boolean;
+  tokens: {
+    accessToken: string;
+    expiresIn: number;
+  };
 }
 
 @Injectable({
@@ -41,13 +104,20 @@ export interface AuthorizeResponse {
 })
 export class AuthService {
   baseUrl = environment.baseUrl;
-  constructor(private readonly http: HttpClient) {}
+
+  private get v2BaseUrl(): string {
+    return `${this.baseUrl}/api/v2/auth`;
+  }
+
+  constructor(
+    private readonly http: HttpClient,
+    private readonly sessionStorageService: SessionStorageService,
+  ) { }
 
   /**
-   * Sign in - creates SSO session cookie
+   * @deprecated Use loginV2() instead. v1 signin will be removed on 2026-05-01
    */
   signIn(emailOrNuid: string, password: string): Observable<SignInResponse> {
-    // Detect if it's an email or nuid
     const isEmail = emailOrNuid.includes('@');
     const payload = isEmail
       ? { email: emailOrNuid, password }
@@ -60,28 +130,19 @@ export class AuthService {
     );
   }
 
-  /**
-   * Sign up new user
-   */
   signUp(values: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/api/v1/auth/signup`, values, {
       withCredentials: true,
     });
   }
 
-  /**
-   * Get current user profile (authenticated with SSO cookie)
-   */
   getProfile(): Observable<{ success: boolean; user: UserProfile }> {
     return this.http.get<{ success: boolean; user: UserProfile }>(
-      `${this.baseUrl}/api/v1/user/profile`,
+      `${this.baseUrl}/api/v2/user/profile`,
       { withCredentials: true },
     );
   }
 
-  /**
-   * Update current user profile (authenticated with SSO cookie)
-   */
   updateProfile(
     profileData: Partial<UserProfile>,
   ): Observable<{ success: boolean; message: string; user: UserProfile }> {
@@ -94,9 +155,6 @@ export class AuthService {
     });
   }
 
-  /**
-   * Get user tenants with apps
-   */
   getUserTenants(): Observable<{
     success: boolean;
     tenants: TenantWithApps[];
@@ -107,37 +165,37 @@ export class AuthService {
     );
   }
 
-  /**
-   * Generate authorization code for app access
-   */
   authorize(
     tenantId: string,
     appId: string,
     redirectUri: string,
+    pkce?: {
+      codeChallenge?: string;
+      codeChallengeMethod?: string;
+      state?: string;
+      nonce?: string;
+    },
   ): Observable<AuthorizeResponse> {
     return this.http.post<AuthorizeResponse>(
       `${this.baseUrl}/api/v1/auth/authorize`,
-      { tenantId, appId, redirectUri },
+      { tenantId, appId, redirectUri, ...pkce },
       { withCredentials: true },
     );
   }
 
   /**
-   * Logout - clears SSO session
+   * @deprecated Use logoutV2() instead. v1 logout will be removed on 2026-05-01
    */
   logout(): Observable<any> {
     return this.http
       .post(`${this.baseUrl}/api/v1/auth/logout`, {}, { withCredentials: true })
       .pipe(
         tap(() => {
-          // Cookie cleared by backend
+          this.sessionStorageService.clearAll();
         }),
       );
   }
 
-  /**
-   * Password recovery
-   */
   sendEmailRecovery(nit: string): Observable<any> {
     return this.http.post(
       `${this.baseUrl}/api/v1/auth/forgot-password`,
@@ -154,9 +212,6 @@ export class AuthService {
     );
   }
 
-  /**
-   * Email verification
-   */
   sendEmailOtpCode(email: string, userId: string): Observable<any> {
     return this.http.post(
       `${this.baseUrl}/api/v1/email-verification/send`,
@@ -173,9 +228,6 @@ export class AuthService {
     );
   }
 
-  /**
-   * 2FA/TOTP methods
-   */
   generateOTP(userId: string, name: string): Observable<any> {
     return this.http.post(
       `${this.baseUrl}/api/v1/otp/generate`,
@@ -204,5 +256,103 @@ export class AuthService {
     return this.http.get(`${this.baseUrl}/api/v1/otp/status/${userId}`, {
       withCredentials: true,
     });
+  }
+
+  // ============================================================
+  // V2 API Methods (Redis-backed, JWT Bearer + PKCE)
+  // ============================================================
+
+  /**
+   * Login con email o NUID + password
+   * Guarda el token en sessionStorage para el interceptor
+   */
+  loginV2(
+    emailOrNuid: string,
+    password: string,
+    appId: string = environment.appId || 'sso-portal',
+    tenantId: string = environment.tenantId || 'tenant-default',
+  ): Observable<LoginV2Response> {
+    const isEmail = emailOrNuid.includes('@');
+    const payload: LoginV2Request = {
+      ...(isEmail ? { email: emailOrNuid } : { nuid: emailOrNuid }),
+      password,
+      appId,
+      tenantId,
+    };
+
+    return this.http.post<LoginV2Response>(
+      `${this.v2BaseUrl}/login`,
+      payload,
+    ).pipe(
+      tap((response) => {
+        if (response.accessToken) {
+          this.sessionStorageService.saveV2AccessToken(response.accessToken);
+          this.sessionStorageService.setV2AuthMode(true);
+        }
+      }),
+    );
+  }
+
+  /**
+   * @deprecated El flujo redirect (launchApp) será eliminado en favor del flujo iframe.
+   * Las apps satélites usarán @bigso/auth-sdk/browser para autenticación.
+   */
+  authorizeV2(
+    tenantId: string,
+    appId: string,
+    redirectUri: string,
+    codeChallenge: string,
+    codeChallengeMethod: string = 'S256',
+    codeVerifier?: string,
+    state?: string,
+    nonce?: string,
+  ): Observable<AuthorizeV2Response> {
+    return this.http.post<AuthorizeV2Response>(
+      `${this.v2BaseUrl}/authorize`,
+      { tenantId, appId, redirectUri, codeChallenge, codeChallengeMethod, codeVerifier, state, nonce },
+      { withCredentials: true },
+    );
+  }
+
+  exchangeV2(
+    code: string,
+    appId: string,
+    codeVerifier: string,
+  ): Observable<ExchangeV2Response> {
+    return this.http.post<ExchangeV2Response>(
+      `${this.v2BaseUrl}/exchange`,
+      { code, appId, codeVerifier },
+      { withCredentials: true },
+    );
+  }
+
+  refreshV2(): Observable<RefreshV2Response> {
+    return this.http.post<RefreshV2Response>(
+      `${this.v2BaseUrl}/refresh`,
+      {},
+      { withCredentials: true },
+    );
+  }
+
+  /**
+   * Logout v2 con Bearer token
+   * Limpia sessionStorage y revoca sesión en SSO
+   */
+  logoutV2(revokeAll: boolean = false): Observable<any> {
+    const accessToken = this.sessionStorageService.getV2AccessToken();
+
+    return this.http.post(
+      `${this.v2BaseUrl}/logout`,
+      { revokeAll },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    ).pipe(
+      tap(() => {
+        this.sessionStorageService.clearAll();
+      }),
+    );
   }
 }
