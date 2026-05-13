@@ -33,8 +33,8 @@
     <div class="step-content intro-step">
       <div class="intro-brands">
         <div class="brand-product">
-          <div class="product-logo">O</div>
-          <span class="product-name">Ordamy</span>
+          <div class="product-logo">{{ appName.charAt(0) | uppercase }}</div>
+          <span class="product-name">{{ appName }}</span>
         </div>
         <div class="brand-connector">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -56,10 +56,10 @@
       </div>
 
       <div class="intro-content">
-        <h1 class="intro-title">Crear cuenta en Ordamy</h1>
-        <p class="intro-subtitle">
-          Para acceder a <strong>Ordamy</strong>, primero necesitas una cuenta de <strong>Bigso</strong>.
-          Una sola cuenta para todos los productos.
+        <h1 class="intro-title">Crear cuenta en {{ appName }}</h1>
+        <p class="intro-description">
+          <strong>{{ appName }}</strong> usa Bigso ID para gestionar sus cuentas.
+          Con una sola identidad podrás acceder a todas las aplicaciones del ecosistema con la máxima seguridad.
         </p>
       </div>
 

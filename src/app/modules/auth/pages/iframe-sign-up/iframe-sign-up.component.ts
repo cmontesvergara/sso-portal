@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { toast } from 'ngx-sonner';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../../../../core/services/auth/auth.service';
@@ -42,6 +42,9 @@ export class IframeSignUpComponent implements OnInit {
   step2Form!: FormGroup;
   step3Form!: FormGroup;
 
+  // Step 0 variables
+  appName: string = 'TU APP';
+
   // Step 4 variables
   registeredEmail: string = '';
   registeredUserId: string = '';
@@ -60,6 +63,7 @@ export class IframeSignUpComponent implements OnInit {
     private readonly fb: FormBuilder,
     private readonly authService: AuthService,
     private readonly router: Router,
+    private readonly route: ActivatedRoute,
   ) {
     // Step 1: Personal Info
     this.step1Form = this.fb.group({
@@ -100,7 +104,11 @@ export class IframeSignUpComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Component ready
+    this.route.queryParams.subscribe(params => {
+      if (params['appName']) {
+        this.appName = params['appName'];
+      }
+    });
   }
 
   get f() {
