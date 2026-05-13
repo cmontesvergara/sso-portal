@@ -81,42 +81,29 @@
   letter-spacing: -0.5px;
 }
 
-.step-indicator {
+// Step Dots Progress
+.step-dots {
   display: flex;
+  gap: 6px;
   align-items: center;
-  gap: 4px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-secondary);
 }
 
-.step-current {
-  color: var(--primary);
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.step-divider {
-  color: var(--border);
-}
-
-.step-total {
-  color: var(--text-muted);
-}
-
-// Progress Bar
-.progress-bar {
-  max-width: 440px;
-  margin: 12px auto 0;
-  height: 3px;
-  background: var(--border-light);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
+.dot.active {
   background: var(--primary);
-  border-radius: 2px;
-  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 16px;
+  border-radius: 4px;
+}
+
+.dot.success {
+  background: var(--success);
 }
 
 // Main Content - Flex to fill remaining space

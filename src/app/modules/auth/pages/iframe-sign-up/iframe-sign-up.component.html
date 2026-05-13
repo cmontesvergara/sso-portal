@@ -1,0 +1,514 @@
+<div class="signup-fullscreen">
+
+  <!-- Progress Bar -->
+  <div class="progress-container">
+    <div class="progress-header">
+      <div class="brand-mark">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor" />
+            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </div>
+        <span class="brand-text">Bigso ID </span>
+      </div>
+
+      <div class="step-dots" *ngIf="currentStep > 0">
+        <div class="dot" [class.active]="currentStep >= 1"></div>
+        <div class="dot" [class.active]="currentStep >= 2"></div>
+        <div class="dot" [class.active]="currentStep >= 3"></div>
+        <div class="dot" [class.active]="currentStep >= 4" [class.success]="currentStep === 4"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="signup-content">
+
+    <!-- Step 0: Introduction -->
+    @if (currentStep === 0) {
+    <div class="step-content intro-step">
+      <div class="intro-brands">
+        <div class="brand-product">
+          <div class="product-logo">O</div>
+          <span class="product-name">Ordamy</span>
+        </div>
+        <div class="brand-connector">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </div>
+        <div class="brand-sso">
+          <div class="sso-logo">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor" />
+              <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+              <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+          <span class="sso-name">Bigso</span>
+        </div>
+      </div>
+
+      <div class="intro-content">
+        <h1 class="intro-title">Crear cuenta en Ordamy</h1>
+        <p class="intro-subtitle">
+          Para acceder a <strong>Ordamy</strong>, primero necesitas una cuenta de <strong>Bigso</strong>.
+          Una sola cuenta para todos los productos.
+        </p>
+      </div>
+
+      <div class="intro-features">
+        <div class="feature-item">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clip-rule="evenodd" />
+          </svg>
+          <span>Una cuenta para todos tus negocios</span>
+        </div>
+        <div class="feature-item">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clip-rule="evenodd" />
+          </svg>
+          <span>Seguridad empresarial garantizada</span>
+        </div>
+        <div class="feature-item">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path d="M13 7H7v6h6V7z" />
+            <path fill-rule="evenodd"
+              d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 110-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z"
+              clip-rule="evenodd" />
+          </svg>
+          <span>Acceso inmediato tras verificar</span>
+        </div>
+      </div>
+
+      <div class="intro-actions">
+        <button type="button" class="btn-primary" (click)="nextStep()">
+          Comenzar registro
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+              clip-rule="evenodd" />
+          </svg>
+        </button>
+
+
+      </div>
+    </div>
+    }
+
+    <!-- Step 1: Personal Info -->
+    @if (currentStep === 1) {
+    <div class="step-content">
+      <div class="step-header">
+        <h1 class="step-title">Cuéntanos de ti</h1>
+        <p class="step-subtitle">Empecemos con tu nombre</p>
+      </div>
+
+      <form [formGroup]="step1Form" (ngSubmit)="nextStep()" class="step-form">
+
+        <div class="input-group">
+          <label class="input-label">Nombre</label>
+          <input type="text" formControlName="firstName" class="input-field"
+            [class.error]="step1Form.get('firstName')?.touched && step1Form.get('firstName')?.invalid"
+            placeholder="Tu nombre" autofocus />
+          @if (step1Form.get('firstName')?.touched && step1Form.get('firstName')?.errors?.['required']) {
+          <p class="input-error">El nombre es obligatorio</p>
+          } @else if (step1Form.get('firstName')?.touched && step1Form.get('firstName')?.errors?.['minlength']) {
+          <p class="input-error">Mínimo 2 caracteres</p>
+          }
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Apellido</label>
+          <input type="text" formControlName="lastName" class="input-field"
+            [class.error]="step1Form.get('lastName')?.touched && step1Form.get('lastName')?.invalid"
+            placeholder="Tu apellido" />
+          @if (step1Form.get('lastName')?.touched && step1Form.get('lastName')?.errors?.['required']) {
+          <p class="input-error">El apellido es obligatorio</p>
+          } @else if (step1Form.get('lastName')?.touched && step1Form.get('lastName')?.errors?.['minlength']) {
+          <p class="input-error">Mínimo 2 caracteres</p>
+          }
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Documento de identidad</label>
+          <input type="text" formControlName="document" class="input-field"
+            [class.error]="step1Form.get('document')?.touched && step1Form.get('document')?.invalid"
+            placeholder="Ej: 1234567890" maxlength="11" inputmode="numeric" />
+          @if (step1Form.get('document')?.touched && step1Form.get('document')?.errors?.['required']) {
+          <p class="input-error">El documento es obligatorio</p>
+          } @else if (step1Form.get('document')?.touched && step1Form.get('document')?.errors?.['pattern']) {
+          <p class="input-error">Solo se permiten números</p>
+          } @else if (step1Form.get('document')?.touched && step1Form.get('document')?.errors?.['minlength']) {
+          <p class="input-error">Mínimo 6 dígitos</p>
+          }
+        </div>
+
+        <button type="submit" class="btn-primary">
+          Continuar
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+              clip-rule="evenodd" />
+          </svg>
+        </button>
+
+        <!-- <div class="step-footer">
+            <span>¿Ya tienes cuenta?</span>
+            <a routerLink="/auth/sign-in">Inicia sesión</a>
+          </div> -->
+      </form>
+    </div>
+    }
+
+    <!-- Step 2: Contact Info -->
+    @if (currentStep === 2) {
+    <div class="step-content">
+      <div class="step-header">
+        <h1 class="step-title">Tus datos de contacto</h1>
+        <p class="step-subtitle">¿Cómo podemos contactarte?</p>
+      </div>
+
+      <form [formGroup]="step2Form" (ngSubmit)="nextStep()" class="step-form">
+
+        <div class="input-group">
+          <label class="input-label">Correo electrónico</label>
+          <input type="email" formControlName="email" class="input-field"
+            [class.error]="step2Form.get('email')?.touched && step2Form.get('email')?.invalid"
+            placeholder="tu@correo.com" autofocus />
+          @if (step2Form.get('email')?.touched && step2Form.get('email')?.errors?.['required']) {
+          <p class="input-error">El correo es obligatorio</p>
+          } @else if (step2Form.get('email')?.touched && step2Form.get('email')?.errors?.['email']) {
+          <p class="input-error">Ingresa un correo válido</p>
+          }
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Teléfono</label>
+          <input type="tel" formControlName="phone" class="input-field"
+            [class.error]="step2Form.get('phone')?.touched && step2Form.get('phone')?.invalid"
+            placeholder="3XX XXX XXXX" maxlength="10" inputmode="numeric" />
+          @if (step2Form.get('phone')?.touched && step2Form.get('phone')?.errors?.['required']) {
+          <p class="input-error">El teléfono es obligatorio</p>
+          } @else if (step2Form.get('phone')?.touched && (step2Form.get('phone')?.errors?.['minlength'] ||
+          step2Form.get('phone')?.errors?.['maxlength'])) {
+          <p class="input-error">Debe tener exactamente 10 dígitos</p>
+          } @else if (step2Form.get('phone')?.touched && step2Form.get('phone')?.errors?.['pattern']) {
+          <p class="input-error">El número debe iniciar con 3 (celular colombiano)</p>
+          } @else {
+          <p class="input-hint">Número de WhatsApp para notificaciones</p>
+          }
+        </div>
+
+        <div class="btn-group">
+          <button type="button" class="btn-secondary" (click)="prevStep()">
+            <svg class="btn-icon-left" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                clip-rule="evenodd" />
+            </svg>
+            Atrás
+          </button>
+
+          <button type="submit" class="btn-primary">
+            Continuar
+            <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      </form>
+    </div>
+    }
+
+    <!-- Step 3: Business & Password -->
+    @if (currentStep === 3) {
+    <div class="step-content">
+      <div class="step-header">
+        <h1 class="step-title">Configura tu cuenta</h1>
+        <p class="step-subtitle">Últimos pasos para comenzar</p>
+      </div>
+
+      <form [formGroup]="step3Form" (ngSubmit)="onSubmit()" class="step-form">
+
+        <!-- <div class="input-group">
+            <label class="input-label">Nombre del negocio</label>
+            <input 
+              type="text" 
+              formControlName="companyName"
+              class="input-field"
+              [class.error]="step3Form.get('companyName')?.touched && step3Form.get('companyName')?.invalid"
+              placeholder="Ej: Mi Restaurante"
+              autofocus
+            />
+          </div> -->
+
+        <div class="input-group">
+          <label class="input-label">Contraseña</label>
+          <div class="password-wrapper">
+            <input [type]="passwordTextType ? 'text' : 'password'" formControlName="password" class="input-field"
+              [class.error]="step3Form.get('password')?.touched && step3Form.get('password')?.invalid"
+              placeholder="Crea una contraseña segura" (input)="passwordStrongLevel()" />
+            <button type="button" class="password-toggle" (click)="togglePasswordTextType()" tabindex="-1">
+              @if (passwordTextType) {
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                <path fill-rule="evenodd"
+                  d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                  clip-rule="evenodd" />
+              </svg>
+              } @else {
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.418-5.418z"
+                  clip-rule="evenodd" />
+              </svg>
+              }
+            </button>
+          </div>
+
+          <!-- Password Strength -->
+          @if (step3Form.get('password')?.value) {
+          <div class="password-strength">
+            <div class="strength-bars">
+              @for (i of [1, 2, 3, 4]; track i) {
+              <div class="strength-bar" [class.active]="passwordStrength >= i"></div>
+              }
+            </div>
+            <span class="strength-text">
+              @switch (passwordStrength) {
+              @case (0) { Muy débil }
+              @case (1) { Débil }
+              @case (2) { Regular }
+              @case (3) { Buena }
+              @case (4) { Excelente }
+              }
+            </span>
+          </div>
+          }
+          @if (step3Form.get('password')?.touched && step3Form.get('password')?.errors?.['required']) {
+          <p class="input-error">La contraseña es obligatoria</p>
+          } @else if (step3Form.get('password')?.touched && step3Form.get('password')?.errors?.['minlength']) {
+          <p class="input-error">Mínimo 8 caracteres</p>
+          } @else if (step3Form.get('password')?.touched && step3Form.get('password')?.errors?.['pattern']) {
+          <p class="input-error">Debe incluir mayúscula, número y símbolo (!&#64;#$%^&*)</p>
+          } @else {
+          <p class="input-hint">Mínimo 8 caracteres con mayúscula, número y símbolo</p>
+          }
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Repite tu Contraseña</label>
+          <div class="password-wrapper">
+            <input [type]="passwordTextType ? 'text' : 'password'" formControlName="confirmPassword" class="input-field"
+              [class.error]="step3Form.get('confirmPassword')?.touched && step3Form.get('confirmPassword')?.invalid"
+              placeholder="Crea una contraseña segura" (input)="passwordStrongLevel()" />
+            <button type="button" class="password-toggle" (click)="togglePasswordTextType()" tabindex="-1">
+              @if (passwordTextType) {
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                <path fill-rule="evenodd"
+                  d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                  clip-rule="evenodd" />
+              </svg>
+              } @else {
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.418-5.418z"
+                  clip-rule="evenodd" />
+              </svg>
+              }
+            </button>
+          </div>
+
+          <!-- Password Strength -->
+          @if (step3Form.get('confirmPassword')?.value) {
+          <div class="password-strength">
+            <div class="strength-bars">
+              @for (i of [1, 2, 3, 4]; track i) {
+              <div class="strength-bar" [class.active]="passwordStrength >= i"></div>
+              }
+            </div>
+            <span class="strength-text">
+              @switch (passwordStrength) {
+              @case (0) { Muy débil }
+              @case (1) { Débil }
+              @case (2) { Regular }
+              @case (3) { Buena }
+              @case (4) { Excelente }
+              }
+            </span>
+          </div>
+          }
+
+          @if (step3Form.get('confirmPassword')?.touched && step3Form.get('confirmPassword')?.errors?.['required']) {
+          <p class="input-error">Debes confirmar tu contraseña</p>
+          } @else if (step3Form.get('confirmPassword')?.touched &&
+          step3Form.get('confirmPassword')?.errors?.['passwordMismatch']) {
+          <p class="input-error">Las contraseñas no coinciden</p>
+          } @else {
+          <p class="input-hint">Debe ser igual a la contraseña ingresada</p>
+          }
+        </div>
+
+        <div class="terms-group">
+          <label class="checkbox-wrapper">
+            <input type="checkbox" formControlName="acceptTerms" class="checkbox-input" />
+            <span class="checkbox-check">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clip-rule="evenodd" />
+              </svg>
+            </span>
+            <span class="checkbox-text">
+              Acepto los <a href="#" target="_blank">Términos de servicio</a> y <a href="#" target="_blank">Política de
+                privacidad</a> de Bigso Labs.
+            </span>
+          </label>
+        </div>
+
+        <div class="btn-group">
+          <button type="button" class="btn-secondary" (click)="prevStep()">
+            <svg class="btn-icon-left" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                clip-rule="evenodd" />
+            </svg>
+            Atrás
+          </button>
+
+          <button type="submit" class="btn-primary" [class.loading]="isSubmitting"
+            [disabled]="step3Form.invalid || isSubmitting">
+            @if (isSubmitting) {
+            <span class="spinner"></span>
+            Creando cuenta...
+            } @else {
+            Crear cuenta
+            <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clip-rule="evenodd" />
+            </svg>
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+    }
+
+    <!-- Step 4: Email Verification -->
+    @if (currentStep === 4) {
+    <div class="step-content">
+      @if (!isVerified) {
+        <div class="step-header">
+          <div class="success-icon-wrapper" style="display: flex; justify-content: center; margin-bottom: 24px;">
+            <div style="padding: 8px; border-radius: 50%; background: rgba(16, 185, 129, 0.15);">
+              <div class="sso-logo"
+                style="margin: 0; width: 48px; height: 48px; background: var(--success); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);border-radius: 50%;">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  style="width: 28px; height: 28px; color: white;">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                    d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+          <h2 class="step-title" style="font-size: 24px;">¡Cuenta creada con éxito!</h2>
+          <p class="step-subtitle" style="margin-bottom: 16px; font-size: 14px;">
+            Te hemos enviado un código de verificación a <strong>{{ registeredEmail }}</strong>.
+          </p>
+
+          <div
+            style="display: flex; gap: 12px; align-items: flex-start; background: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--warning); padding: 12px 16px; border-radius: 6px; text-align: left; margin-bottom: 24px;">
+            <svg viewBox="0 0 24 24" fill="none"
+              style="width: 20px; height: 20px; color: var(--warning); flex-shrink: 0; margin-top: 2px;">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <p style="margin: 0; font-size: 13px; color: #b45309; line-height: 1.5;">
+              Ingresa el código para activar tu cuenta. Si decides omitir este paso, tu cuenta <strong>permanecerá
+                desactivada</strong>.
+            </p>
+          </div>
+        </div>
+
+        <form class="step-form" (ngSubmit)="verifyManualCode()">
+          <div class="input-group">
+            <input type="text" id="verificationCode" name="verificationCode" [(ngModel)]="verificationCode"
+              placeholder="0 0 0 0 0 0" class="input-field"
+              style="text-align: center; letter-spacing: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 24px; font-weight: 600; height: 56px; border-width: 2px;" />
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+              <span style="font-size: 12px; color: var(--text-secondary);">Código de seguridad</span>
+              <button type="button" (click)="resendCode()" [disabled]="isResending"
+                style="background: none; border: none; padding: 0; color: var(--primary); font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: underline;">
+                {{ isResending ? 'Reenviando...' : 'Reenviar código' }}
+              </button>
+            </div>
+
+            @if (verifyErrorMessage) {
+            <p class="input-error" style="margin-top: 8px; text-align: center;">{{ verifyErrorMessage }}</p>
+            }
+          </div>
+
+          <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px;">
+            <button type="submit" class="btn-primary" [disabled]="isVerifying || !verificationCode"
+              [class.loading]="isVerifying">
+              @if (isVerifying) {
+              <div class="spinner"></div>
+              } @else {
+              Verificar cuenta ahora
+              }
+            </button>
+            <button type="button"
+              style="background: none; border: none; color: var(--text-secondary); font-size: 13px; font-weight: 500; cursor: pointer; padding: 8px;"
+              (click)="finishWithoutVerification()">
+              Omitir y verificar más tarde
+            </button>
+          </div>
+        </form>
+      } @else {
+        <div class="success-state" style="text-align: center; padding: 24px 0;">
+          <div style="display: inline-flex; justify-content: center; align-items: center; width: 64px; height: 64px; border-radius: 50%; background: var(--success); color: white; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);">
+            <svg viewBox="0 0 24 24" fill="none" style="width: 32px; height: 32px;">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h2 style="font-size: 24px; margin-bottom: 12px; color: var(--text);">¡Todo listo!</h2>
+          <p style="font-size: 15px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 24px;">
+            Tu cuenta ha sido activada exitosamente y está lista para usarse.
+          </p>
+          <div style="background: rgba(16, 185, 129, 0.1); border-left: 4px solid var(--success); padding: 16px; border-radius: 6px; text-align: left;">
+            <p style="margin: 0; font-size: 14px; color: #047857; font-weight: 500;">
+              <svg viewBox="0 0 20 20" fill="currentColor" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 4px; margin-top: -2px;">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+              </svg>
+              Si te estás registrando desde otra aplicación o sitio, ya puedes cerrar esta ventana para continuar.
+            </p>
+          </div>
+        </div>
+      }
+    </div>
+    }
+
+  </div>
+
+  <!-- Footer -->
+  <div class="signup-footer">
+    <p>Powered by <strong>Bigso Labs</strong> — La plataforma para tu negocio</p>
+  </div>
+
+</div>

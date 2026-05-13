@@ -136,6 +136,26 @@ export class AuthService {
     });
   }
 
+  /**
+   * Registro de usuario v2 — apunta al endpoint hexagonal correcto.
+   * Requiere: email, password, firstName, lastName, tenantId.
+   * Opcionales: nuid, phone.
+   * Respuesta: { id, email, firstName, lastName, fullName, userStatus, ... }
+   */
+  registerV2(values: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    tenantId: string;
+    nuid?: string;
+    phone?: string;
+  }): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/v2/users/register`, values, {
+      withCredentials: true,
+    });
+  }
+
   getProfile(): Observable<{ success: boolean; user: UserProfile }> {
     return this.http.get<{ success: boolean; user: UserProfile }>(
       `${this.baseUrl}/api/v2/user/profile`,
@@ -214,7 +234,7 @@ export class AuthService {
 
   sendEmailOtpCode(email: string, userId: string): Observable<any> {
     return this.http.post(
-      `${this.baseUrl}/api/v1/email-verification/send`,
+      `${this.baseUrl}/api/v2/users/send-verification`,
       { email, userId },
       { withCredentials: true },
     );
@@ -222,7 +242,7 @@ export class AuthService {
 
   verifyEmailToken(token: string): Observable<any> {
     return this.http.post(
-      `${this.baseUrl}/api/v1/email-verification/verify`,
+      `${this.baseUrl}/api/v2/users/verify-email`,
       { token },
       { withCredentials: true },
     );
