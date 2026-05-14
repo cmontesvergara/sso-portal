@@ -1,0 +1,166 @@
+<div class="signup-fullscreen bg-transparent">
+  <div class="signup-content is-embedded">
+    <div class="step-content intro-step" style="width: 100%;">
+
+      <!-- App Context Header for embedded mode -->
+      <div class="w-full" style="text-align: left;">
+        <div class="app-row" style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+          <div class="app-icon"
+            style="width: 44px; height: 44px; border-radius: 11px; background: #EEEDFE; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" style="width: 22px; height: 22px; color: #534AB7;">
+              <rect x="4" y="4" width="6" height="6" rx="1"></rect>
+              <rect x="14" y="4" width="6" height="6" rx="1"></rect>
+              <rect x="4" y="14" width="6" height="6" rx="1"></rect>
+              <rect x="14" y="14" width="6" height="6" rx="1"></rect>
+            </svg>
+          </div>
+          <div>
+            <div class="app-name" style="font-size: 16px; font-weight: 700; color: var(--text); margin: 0 0 2px;">{{
+              appName || 'Ordamy' }}</div>
+            <div class="app-desc" style="font-size: 13px; color: var(--text-secondary); margin: 0;">{{ iframeOrigin ||
+              (appName ? appName.toLowerCase() + '.bigso.co' : 'ordamy.bigso.co') }}</div>
+          </div>
+          <div class="app-verified" *ngIf="isFetchingTenant || isTenantValid"
+            style="margin-left: auto; display: flex; align-items: center; gap: 4px; border-radius: 20px; padding: 4px 10px; font-size: 12px; font-weight: 600; white-space: nowrap; flex-shrink: 0;"
+            [ngStyle]="isFetchingTenant ? {'background': '#F1F5F9', 'border': '1px solid #E2E8F0', 'color': '#64748B'} : {'background': '#EAF3DE', 'border': '1px solid #C0DD97', 'color': '#3B6D11'}">
+            <svg *ngIf="!isFetchingTenant" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <svg *ngIf="isFetchingTenant" class="animate-spin" viewBox="0 0 24 24" fill="none"
+              style="width: 14px; height: 14px; color: currentColor;">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+              </path>
+            </svg>
+            {{ isFetchingTenant ? 'Verificando...' : 'Verificado' }}
+          </div>
+        </div>
+
+
+        <div class="app-context">
+          <div class="meta-grid">
+            <div class="meta-cell">
+              <div class="meta-label">Organización</div>
+              <div class="meta-value">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                  stroke-linejoin="round" style="width: 16px; height: 16px; color: var(--text-secondary);">
+                  <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                  <path d="M9 22v-4h6v4"></path>
+                  <path d="M8 6h.01"></path>
+                  <path d="M16 6h.01"></path>
+                  <path d="M12 6h.01"></path>
+                  <path d="M12 10h.01"></path>
+                  <path d="M12 14h.01"></path>
+                  <path d="M16 10h.01"></path>
+                  <path d="M16 14h.01"></path>
+                  <path d="M8 10h.01"></path>
+                  <path d="M8 14h.01"></path>
+                </svg>
+                {{ tenantName || '-' }}
+              </div>
+            </div>
+            <div class="meta-cell">
+              <div class="meta-label">Protocolo</div>
+              <div class="meta-value">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                  stroke-linejoin="round" style="width: 16px; height: 16px; color: var(--text-secondary);">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                OAuth 2.0
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <form *ngIf="!isFetchingTenant && isTenantValid" class="step-form" style="text-align: left;" [formGroup]="form"
+        (ngSubmit)="onSubmit()">
+        <div class="input-group">
+          <label class="input-label" for="nit">Correo</label>
+          <input type="email" id="nit" formControlName="nit" class="input-field"
+            [ngClass]="{ 'error': submitted && f['nit'].errors }" placeholder="tu@empresa.com" />
+          <div *ngIf="submitted && f['nit'].errors" class="input-error" style="margin-top: 4px;">
+            <span *ngIf="f['nit'].errors['required']">Requerido</span>
+            <span *ngIf="f['nit'].errors['email']">Correo inválido</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <label class="input-label" for="password">Contraseña</label>
+            <a routerLink="/auth/forgot-password" tabindex="-1"
+              style="font-size: 13px; color: var(--primary); text-decoration: none; font-weight: 500;">¿Olvidaste?</a>
+          </div>
+          <div class="password-wrapper">
+            <input [type]="passwordTextType ? 'text' : 'password'" id="password" formControlName="password"
+              class="input-field" [ngClass]="{ 'error': submitted && f['password'].errors }" placeholder="••••••••"
+              style="padding-right: 48px;" />
+            <button type="button" class="password-toggle" (click)="togglePasswordTextType()">
+              <svg-icon
+                [src]="!passwordTextType ? 'assets/icons/heroicons/outline/eye-off.svg' : 'assets/icons/heroicons/outline/eye.svg'"
+                [svgClass]="'h-5 w-5'"></svg-icon>
+            </button>
+          </div>
+          <div *ngIf="submitted && f['password'].errors" class="input-error" style="margin-top: 4px;">
+            <span *ngIf="f['password'].errors['required']">Requerido</span>
+          </div>
+        </div>
+
+
+
+        <button type="submit" class="btn-primary" style="margin-top: 12px;" [disabled]="form.invalid || isSubmitting"
+          [class.loading]="isSubmitting">
+          <svg *ngIf="isSubmitting" class="animate-spin" style="width: 20px; height: 20px; margin-right: 8px;"
+            fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+          </svg>
+          <span *ngIf="!isSubmitting">Iniciar sesión</span>
+        </button>
+
+
+      </form>
+
+      <div *ngIf="isFetchingTenant"
+        style="padding: 40px 0; display: flex; justify-content: center; align-items: center; flex-direction: column;">
+        <svg class="animate-spin" style="width: 32px; height: 32px; color: var(--primary); margin-bottom: 12px;"
+          fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+          </path>
+        </svg>
+        <span style="font-size: 14px; color: var(--text-secondary); font-weight: 500;">Validando organización...</span>
+      </div>
+
+      <div *ngIf="!isFetchingTenant && !isTenantValid"
+        style="padding: 40px 0; display: flex; justify-content: center; align-items: center; flex-direction: column; text-align: center;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+          stroke-linejoin="round" style="width: 48px; height: 48px; color: #EF4444; margin-bottom: 16px;">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <h3 style="font-size: 16px; font-weight: 600; color: var(--text); margin: 0 0 8px;">Acceso no autorizado</h3>
+        <span style="font-size: 14px; color: var(--text-secondary); line-height: 1.5;">La organización no existe o no se
+          encuentra activa en el sistema. Verifica que estés intentando iniciar sesión desde un portal válido.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card Footer - Embedded only -->
+  <div class="card-foot">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+      stroke-linejoin="round" style="width: 14px; height: 14px; color: var(--text-muted);">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+    </svg>
+    <span class="foot-text">Bigso ID - Conexión cifrada</span>
+  </div>
+</div>

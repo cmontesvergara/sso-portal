@@ -248,6 +248,12 @@ export class AuthService {
     );
   }
 
+  getTenantPublicInfo(tenantId: string): Observable<{ success: boolean; tenant: { name: string; slug: string } }> {
+    return this.http.get<{ success: boolean; tenant: { name: string; slug: string } }>(
+      `${this.baseUrl}/api/v2/tenants/${tenantId}/info`
+    );
+  }
+
   generateOTP(userId: string, name: string): Observable<any> {
     return this.http.post(
       `${this.baseUrl}/api/v1/otp/generate`,

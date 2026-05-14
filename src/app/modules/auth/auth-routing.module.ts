@@ -13,6 +13,7 @@ import { SignInComponent } from './pages/sign-in/sign-in.component';
 import { SignUpComponent } from './pages/sign-up/sign-up.component';
 import { TwoStepsComponent } from './pages/two-steps/two-steps.component';
 import { IframeSignUpComponent } from './pages/iframe-sign-up/iframe-sign-up.component';
+import { IFrameSignInComponent } from './pages/iframe-sign-in/i-sign-in.component';
 
 const routes: Routes = [
   {
@@ -23,6 +24,11 @@ const routes: Routes = [
       {
         path: 'sign-in',
         component: SignInComponent,
+        data: { returnUrl: window.location.pathname },
+      },
+      {
+        path: 'i-sign-in',
+        component: IFrameSignInComponent,
         data: { returnUrl: window.location.pathname },
       },
       {
@@ -61,4 +67,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
-export class AuthRoutingModule {}
+export class AuthRoutingModule { }
