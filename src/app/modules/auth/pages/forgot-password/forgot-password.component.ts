@@ -21,7 +21,7 @@ import { ButtonComponent } from 'src/app/shared/components/button/button.compone
   providers: [AuthService],
 })
 export class ForgotPasswordComponent implements OnInit {
-  nit: string = '';
+  email: string = '';
   disabledSendButton: boolean = false;
   constructor(private readonly authService: AuthService,private readonly router:Router) {}
 
@@ -30,7 +30,7 @@ export class ForgotPasswordComponent implements OnInit {
   }
   onSubmit() {
 
-    this.authService.sendEmailRecovery(this.nit).subscribe(
+    this.authService.sendEmailRecovery(this.email).subscribe(
       (response: any) => {
         this.disabledSendButton = true
         console.log(response);

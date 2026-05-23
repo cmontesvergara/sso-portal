@@ -216,10 +216,10 @@ export class AuthService {
       );
   }
 
-  sendEmailRecovery(nit: string): Observable<any> {
+  sendEmailRecovery(email: string): Observable<any> {
     return this.http.post(
-      `${this.baseUrl}/api/v1/auth/forgot-password`,
-      { nit },
+      `${this.baseUrl}/api/v2/auth/forgot-password`,
+      { email },
       { withCredentials: true },
     );
   }
