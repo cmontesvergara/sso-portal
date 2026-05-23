@@ -224,10 +224,10 @@ export class AuthService {
     );
   }
 
-  validateEmailRecovery(password: string, otp: string): Observable<any> {
+  validateEmailRecovery(newPassword: string, token: string): Observable<any> {
     return this.http.post(
-      `${this.baseUrl}/api/v1/auth/reset-password`,
-      { password, otp },
+      `${this.baseUrl}/api/v2/auth/reset-password`,
+      { newPassword, token },
       { withCredentials: true },
     );
   }

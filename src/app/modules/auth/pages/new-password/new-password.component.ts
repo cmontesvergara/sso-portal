@@ -25,7 +25,7 @@ import { ButtonComponent } from 'src/app/shared/components/button/button.compone
 })
 export class NewPasswordComponent implements OnInit {
   newPasswordForm!: FormGroup;
-  otp: string = '';
+  token: string = '';
   disabledSendButton: boolean = false;
   passwordStrength: number = 0;
   passwordTextType!: boolean;
@@ -65,8 +65,8 @@ export class NewPasswordComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
-      if (params['otp']) {
-        this.otp = params['otp'];
+      if (params['token']) {
+        this.token = params['token'];
       } else {
         this.disabledSendButton = true;
         toast.error('Url invalida.', {
@@ -83,7 +83,7 @@ export class NewPasswordComponent implements OnInit {
   }
 
   onSubmit() {
-    this.authService.validateEmailRecovery(this.newPasswordForm.value.password, this.otp).subscribe(
+    this.authService.validateEmailRecovery(this.newPasswordForm.value.password, this.token).subscribe(
 
       (response) => {
         toast.success('Contraseña actualizada correctamente.', {

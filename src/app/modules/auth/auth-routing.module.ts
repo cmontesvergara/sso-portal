@@ -39,6 +39,7 @@ const routes: Routes = [
       { path: 'sign-up', component: SignUpComponent },
       { path: 'forgot-password', component: ForgotPasswordComponent },
       { path: 'new-password', component: NewPasswordComponent },
+      { path: 'reset-password', component: NewPasswordComponent },
       {
         path: 'two-steps',
         component: TwoStepsComponent,
