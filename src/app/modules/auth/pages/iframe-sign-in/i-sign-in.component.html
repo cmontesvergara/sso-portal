@@ -17,9 +17,9 @@
           </div>
           <div>
             <div class="app-name" style="font-size: 16px; font-weight: 700; color: var(--text); margin: 0 0 2px;">{{
-              appName || 'Ordamy' }}</div>
+              appName || 'Bigso IdP' }}</div>
             <div class="app-desc" style="font-size: 13px; color: var(--text-secondary); margin: 0;">{{ iframeOrigin ||
-              (appName ? appName.toLowerCase() + '.bigso.co' : 'ordamy.bigso.co') }}</div>
+              (appName ? appName.toLowerCase() + '.bigso.co' : 'auth.bigso.org') }}</div>
           </div>
           <div class="app-verified" *ngIf="isFetchingTenant || isTenantValid"
             style="margin-left: auto; display: flex; align-items: center; gap: 4px; border-radius: 20px; padding: 4px 10px; font-size: 12px; font-weight: 600; white-space: nowrap; flex-shrink: 0;"
@@ -161,6 +161,6 @@
       stroke-linejoin="round" style="width: 14px; height: 14px; color: var(--text-muted);">
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
     </svg>
-    <span class="foot-text">Bigso ID - Conexión cifrada</span>
+    <span class="foot-text">Powered by Bigso Labs — La plataforma para tu negocio</span>
   </div>
 </div>
