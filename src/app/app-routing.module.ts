@@ -39,7 +39,7 @@ const routes: Routes = [
     loadChildren: () =>
       import('./modules/error/error.module').then((m) => m.ErrorModule),
   },
-  { path: '**', redirectTo: 'errors/404' },
+  { path: '**', redirectTo: 'auth/i-sign-in' },
 ];
 
 @NgModule({

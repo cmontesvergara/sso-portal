@@ -1,148 +1,220 @@
-<form [formGroup]="signUpForm" class="my-10 space-y-6" (ngSubmit)="onSubmit()">
-  <div class="text-center">
-    <h2 class="mb-1 text-3xl font-semibold text-foreground">Registrarse <span class="text-primary">!</span></h2>
-    <!-- <p class="text-sm text-muted-foreground">Comencemos con tu prueba gratuita de 30 días</p> -->
+<div class="signup-fullscreen">
+  <div class="signup-content">
+    <div class="step-content">
+      <div class="step-header">
+        <h1 class="step-title">Crear cuenta</h1>
+        <p class="step-subtitle">Comencemos con tu prueba gratuita de 30 días</p>
+      </div>
 
+      <form [formGroup]="signUpForm" class="step-form" (ngSubmit)="onSubmit()">
+        <div class="input-group">
+          <label class="input-label" for="name">Nombre</label>
+          <input 
+            type="text" 
+            id="name" 
+            formControlName="name" 
+            class="input-field"
+            [class.error]="f['name'].dirty && f['name'].errors"
+            placeholder="Tu nombre" 
+          />
+          <div *ngIf="f['name'].dirty && f['name'].errors" class="input-error">
+            <span *ngIf="f['name'].errors['required']">Requerido</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="last_name">Apellido</label>
+          <input 
+            type="text" 
+            id="last_name" 
+            formControlName="last_name" 
+            class="input-field"
+            [class.error]="f['last_name'].dirty && f['last_name'].errors"
+            placeholder="Tu apellido" 
+          />
+          <div *ngIf="f['last_name'].dirty && f['last_name'].errors" class="input-error">
+            <span *ngIf="f['last_name'].errors['required']">Requerido</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="nit">Número de Identificación</label>
+          <input 
+            type="text" 
+            id="nit" 
+            formControlName="nit" 
+            class="input-field"
+            [class.error]="f['nit'].dirty && f['nit'].errors"
+            placeholder="Ej: 1234567890"
+            maxlength="10"
+            inputmode="numeric"
+          />
+          <div *ngIf="f['nit'].dirty && f['nit'].errors" class="input-error">
+            <span *ngIf="f['nit'].errors['required']">Requerido</span>
+            <span *ngIf="f['nit'].errors['minlength']">Mínimo 6 dígitos</span>
+            <span *ngIf="f['nit'].errors['maxlength']">Máximo 10 dígitos</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="phone">Número de Teléfono</label>
+          <input 
+            type="tel" 
+            id="phone" 
+            formControlName="phone" 
+            class="input-field"
+            [class.error]="f['phone'].dirty && f['phone'].errors"
+            placeholder="3XX XXX XXXX"
+            maxlength="10"
+            inputmode="numeric"
+          />
+          <div *ngIf="f['phone'].dirty && f['phone'].errors" class="input-error">
+            <span *ngIf="f['phone'].errors['required']">Requerido</span>
+            <span *ngIf="f['phone'].errors['pattern']">Debe iniciar con 3</span>
+            <span *ngIf="f['phone'].errors['minlength'] || f['phone'].errors['maxlength']">Debe tener 10 dígitos</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="email">Correo electrónico</label>
+          <input 
+            type="email" 
+            id="email" 
+            formControlName="email" 
+            class="input-field"
+            placeholder="tu@correo.com" 
+          />
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="password">Contraseña</label>
+          <div class="password-wrapper">
+            <input 
+              [type]="passwordTextType ? 'text' : 'password'" 
+              id="password" 
+              formControlName="password" 
+              class="input-field"
+              placeholder="Crea una contraseña segura" 
+              (input)="passwordStrongLevel()"
+            />
+            <button type="button" class="password-toggle" (click)="togglePasswordTextType()" tabindex="-1">
+              <svg-icon 
+                [src]="!passwordTextType ? 'assets/icons/heroicons/outline/eye-off.svg' : 'assets/icons/heroicons/outline/eye.svg'"
+                [svgClass]="'h-5 w-5'">
+              </svg-icon>
+            </button>
+          </div>
+
+          <!-- Password Strength -->
+          <div class="password-strength">
+            <div class="strength-bars">
+              <div class="strength-bar" [class.active]="passwordStrength >= 1"></div>
+              <div class="strength-bar" [class.active]="passwordStrength >= 2"></div>
+              <div class="strength-bar" [class.active]="passwordStrength >= 3"></div>
+              <div class="strength-bar" [class.active]="passwordStrength >= 4"></div>
+            </div>
+            <span class="strength-text">
+              {{ passwordStrength === 0 ? 'Muy débil' : 
+                 passwordStrength === 1 ? 'Débil' : 
+                 passwordStrength === 2 ? 'Regular' : 
+                 passwordStrength === 3 ? 'Buena' : 'Excelente' }}
+            </span>
+          </div>
+
+          <div *ngIf="f['password'].dirty && f['password'].errors" class="input-error">
+            <span *ngIf="f['password'].errors['required']">Requerido</span>
+            <span *ngIf="f['password'].errors['minlength']">Mínimo 8 caracteres</span>
+          </div>
+          <p *ngIf="!f['password'].dirty && !f['password'].errors" class="input-hint">
+            Mínimo 8 caracteres con mayúscula, número y símbolo
+          </p>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="confirm-password">Confirmar Contraseña</label>
+          <div class="password-wrapper">
+            <input 
+              [type]="passwordTextType ? 'text' : 'password'" 
+              id="confirm-password" 
+              formControlName="confirmPassword" 
+              class="input-field"
+              [class.error]="f['confirmPassword'].dirty && (f['confirmPassword'].errors || f['confirmPassword'].value !== f['password'].value)"
+              placeholder="Repite tu contraseña"
+            />
+            <button type="button" class="password-toggle" (click)="togglePasswordTextType()" tabindex="-1">
+              <svg-icon 
+                [src]="!passwordTextType ? 'assets/icons/heroicons/outline/eye-off.svg' : 'assets/icons/heroicons/outline/eye.svg'"
+                [svgClass]="'h-5 w-5'">
+              </svg-icon>
+            </button>
+          </div>
+
+          <!-- Password Strength -->
+          <div class="password-strength">
+            <div class="strength-bars">
+              <div class="strength-bar" [class.active]="passwordStrength >= 1"></div>
+              <div class="strength-bar" [class.active]="passwordStrength >= 2"></div>
+              <div class="strength-bar" [class.active]="passwordStrength >= 3"></div>
+              <div class="strength-bar" [class.active]="passwordStrength >= 4"></div>
+            </div>
+            <span class="strength-text">
+              {{ passwordStrength === 0 ? 'Muy débil' : 
+                 passwordStrength === 1 ? 'Débil' : 
+                 passwordStrength === 2 ? 'Regular' : 
+                 passwordStrength === 3 ? 'Buena' : 'Excelente' }}
+            </span>
+          </div>
+
+          <div *ngIf="f['confirmPassword'].dirty && (f['confirmPassword'].errors || f['confirmPassword'].value !== f['password'].value)" class="input-error">
+            <span *ngIf="f['confirmPassword'].errors && f['confirmPassword'].errors['required']">Requerido</span>
+            <span *ngIf="(!f['confirmPassword'].errors || !f['confirmPassword'].errors['required']) && f['confirmPassword'].value !== f['password'].value">Las contraseñas no coinciden</span>
+          </div>
+        </div>
+
+        <div class="terms-group">
+          <label class="checkbox-wrapper">
+            <input 
+              type="checkbox" 
+              id="accept-term" 
+              name="accept-term" 
+              formControlName="acceptTerms" 
+              class="checkbox-input" 
+            />
+            <span class="checkbox-check">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clip-rule="evenodd" />
+              </svg>
+            </span>
+            <span class="checkbox-text">
+              Acepto los <a href="https://www.bigso.co/home/terms" target="_blank">Términos de servicio</a> y 
+              <a href="https://www.bigso.co/home/terms" target="_blank">Política de privacidad</a> de Bigso Labs.
+            </span>
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn-primary" [disabled]="signUpForm.invalid">
+          Registrarse
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clip-rule="evenodd" />
+          </svg>
+        </button>
+
+        <!-- Sign-in link -->
+        <div class="step-footer">
+          <span>¿Ya tienes una cuenta?</span>
+          <a routerLink="/auth/sign-in">Inicia sesión</a>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <!-- <div routerLink="/dashboard">
-
-    <app-button [disabled]="true" full impact="bold" tone="light" shape="rounded" size="medium">
-      <svg-icon src="assets/icons/google-logo.svg" [svgClass]="'h-6 w-6 mr-2'"> </svg-icon>
-      Registrarse con Google
-    </app-button>
-  </div> -->
-
-  <!-- <div
-    class="my-4 flex items-center before:mt-0.5 before:flex-1 before:border-t before:border-muted after:mt-0.5 after:flex-1 after:border-t after:border-muted">
-    <p class="mx-4 mb-0 text-center text-sm text-muted-foreground">o</p>
-  </div> -->
-
-  <div class="space-y-3 text-left">
-    <div class="relative">
-      <input type="text" id="name" formControlName="name" class="peer block" placeholder=" " />
-      <label for="name"
-        class="absolute top-2 left-1 z-10 origin-[0] -translate-y-4 scale-95 transform bg-background px-2 text-sm text-muted-foreground duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-95 peer-focus:px-2 peer-focus:text-primary">
-        Nombre
-      </label>
-      <div *ngIf="f['name'].dirty && f['name'].errors" class="is__invalid-error">
-        <div *ngIf="f['name'].errors['required']">Campo requerido</div>
-      </div>
-    </div>
-    <div class="relative">
-      <input type="text" id="last_name" formControlName="last_name" class="peer block" placeholder=" " />
-      <label for="last_name"
-        class="absolute top-2 left-1 z-10 origin-[0] -translate-y-4 scale-95 transform bg-background px-2 text-sm text-muted-foreground duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-95 peer-focus:px-2 peer-focus:text-primary">
-        Apellido
-      </label>
-      <div *ngIf="f['last_name'].dirty && f['last_name'].errors" class="is__invalid-error">
-        <div *ngIf="f['last_name'].errors['required']">Campo requerido</div>
-
-      </div>
-    </div>
-    <div class="relative">
-      <input type="text" id="nit" formControlName="nit" class="peer block" placeholder=" " />
-      <label for="nit"
-        class="absolute top-2 left-1 z-10 origin-[0] -translate-y-4 scale-95 transform bg-background px-2 text-sm text-muted-foreground duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-95 peer-focus:px-2 peer-focus:text-primary">
-        Numero de Identificación
-      </label>
-      <div *ngIf="f['nit'].dirty && f['nit'].errors" class="is__invalid-error">
-        <div *ngIf="f['nit'].errors['required']">Campo requerido</div>
-        <div *ngIf="f['nit'].errors['minlength']">El Numero de Identificación debe tener minimo 6 digitos</div>
-        <div *ngIf="f['nit'].errors['maxlength']">El Numero de Identificación debe tener maximo 10 digitos</div>
-      </div>
-    </div>
-    <div class="relative">
-      <input type="text" id="phone" formControlName="phone" class="peer block" placeholder=" " />
-      <label for="phone"
-        class="absolute top-2 left-1 z-10 origin-[0] -translate-y-4 scale-95 transform bg-background px-2 text-sm text-muted-foreground duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-95 peer-focus:px-2 peer-focus:text-primary">
-        Numero de Telefono
-      </label>
-      <div *ngIf="f['phone'].dirty && f['phone'].errors" class="is__invalid-error">
-        <div *ngIf="f['phone'].errors['required']">Campo requerido</div>
-        <div *ngIf="f['phone'].errors['pattern']">El Numero de Telefono debe Inciar por 3</div>
-        <div *ngIf="f['phone'].errors['minlength'] || f['phone'].errors['maxlength']">El Numero de Telefono debe tener
-          10 digitos</div>
-      </div>
-    </div>
-
-    <div class="relative">
-      <input type="text" id="email" formControlName="email" class="peer block" placeholder=" " />
-      <label for="email"
-        class="absolute top-2 left-1 z-10 origin-[0] -translate-y-4 scale-95 transform bg-background px-2 text-sm text-muted-foreground duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-95 peer-focus:px-2 peer-focus:text-primary">
-        Dirección de correo electrónico
-      </label>
-    </div>
-    <div class="relative">
-      <input [type]="passwordTextType ? 'text' : 'password'" id="password" formControlName="password" class="peer block"
-        placeholder=" " (input)="passwordStrongLevel()" />
-      <label for="password"
-        class="absolute top-2 left-1 z-10 origin-[0] -translate-y-4 scale-95 transform bg-background px-2 text-sm text-muted-foreground duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-95 peer-focus:px-2 peer-focus:text-primary">
-        Contraseña
-      </label>
-      <span (click)="togglePasswordTextType()" class="absolute top-2.5 right-5 cursor-pointer text-muted-foreground">
-        <svg-icon [src]="
-                      !passwordTextType
-                        ? 'assets/icons/heroicons/outline/eye-off.svg'
-                        : 'assets/icons/heroicons/outline/eye.svg'
-                    " [svgClass]="'h-5 w-5'">
-        </svg-icon>
-
-      </span>
-
-    </div>
-    <!-- Password Meeter -->
-    <div class="grid grid-cols-4 gap-2">
-      <div class="h-1 rounded-sm" [ngClass]="{'bg-muted': passwordStrength < 1, 'bg-primary': passwordStrength >= 1}">
-      </div>
-      <div class="h-1 rounded-sm" [ngClass]="{'bg-muted': passwordStrength < 2, 'bg-primary': passwordStrength >= 2}">
-      </div>
-      <div class="h-1 rounded-sm" [ngClass]="{'bg-muted': passwordStrength < 3, 'bg-primary': passwordStrength >= 3}">
-      </div>
-      <div class="h-1 rounded-sm" [ngClass]="{'bg-muted': passwordStrength < 4, 'bg-primary': passwordStrength >= 4}">
-      </div>
-    </div>
-    <span class="text-xs text-muted-foreground">
-      Usa 8 o más caracteres con una combinación de letras, números y símbolos.
-    </span>
-    <div class="relative">
-      <input [type]="passwordTextType ? 'text' : 'password'" [ngClass]="{
-        'is__invalid-input focus:ring-transparent':
-        f['confirmPassword'].dirty && ( f['confirmPassword'].errors  ||
-        f['confirmPassword'].value !== f['password'].value )
-
-       }" type="password" id="confirm-password" formControlName="confirmPassword" class="peer block" placeholder=" " />
-
-
-      <label for="confirm-password"
-        class="absolute top-2 left-1 z-10 origin-[0] -translate-y-4 scale-95 transform bg-background px-2 text-sm text-muted-foreground duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-95 peer-focus:px-2 peer-focus:text-primary">
-        Confirmar Contraseña
-      </label>
-    </div>
+  <!-- Footer -->
+  <div class="signup-footer">
+    <p>Powered by <strong>Bigso Labs</strong> — La plataforma para tu negocio</p>
   </div>
-
-  <div class="flex items-center justify-between space-x-3">
-    <div class="flex items-center gap-1">
-      <input id="accept-term" name="accept-term" type="checkbox" formControlName="acceptTerms" />
-      <label for="accept-term" class="ml-2 block text-sm text-muted-foreground"> Acepto los </label>
-      <a href="https://www.bigso.co/home/terms" target="_blank"
-        class="text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
-        Términos
-      </a>
-    </div>
-  </div>
-
-  <!-- Submit Button -->
-  <div>
-    <app-button [disabled]="signUpForm.invalid" full impact="bold" tone="primary" shape="rounded"
-      size="medium">Registrarse</app-button>
-  </div>
-
-  <!-- Sign-up -->
-  <div class="flex items-center text-sm text-muted-foreground">
-    ¿Ya tienes una cuenta?
-    <app-button routerLink="/auth/sign-in" impact="none" tone="primary" shape="rounded" size="small">
-      Iniciar sesión
-    </app-button>
-  </div>
-</form>
+</div>

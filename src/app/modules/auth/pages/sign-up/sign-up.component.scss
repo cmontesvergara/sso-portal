@@ -1,8 +1,776 @@
-.is__invalid-input {
-  border-color: #e11d48;
+// Multi-step Fullscreen Sign-up - Compact No-Scroll Design
+// Bigso Design System - Optimized for common screen heights
+
+:host {
+  --primary: #4F46E5;
+  --primary-hover: #4338CA;
+  --primary-light: #EEF2FF;
+  --primary-soft: rgba(79, 70, 229, 0.08);
+
+  --bg: #FFFFFF;
+  --bg-subtle: #F8FAFC;
+  --text: #0F172A;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+  --border: #E2E8F0;
+  --border-light: #F1F5F9;
+
+  --error: #EF4444;
+  --success: #10B981;
+  --warning: #F59E0B;
+
+  display: block;
+  width: 100%;
+  height: 100vh;
+  background: var(--bg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
 }
 
-.is__invalid-error {
-  color: #e11d48;
-  @apply px-1 pt-1 text-xs;
+// Fullscreen Container - Flex column with space distribution
+.signup-fullscreen {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+// Progress Header - Compact
+.progress-container {
+  flex-shrink: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border-light);
+  padding: 16px 24px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.brand-icon svg {
+  width: 18px;
+  height: 18px;
+  color: white;
+}
+
+.brand-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+// Step Dots Progress
+.step-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dot.active {
+  background: var(--primary);
+  width: 16px;
+  border-radius: 4px;
+}
+
+.dot.success {
+  background: var(--success);
+}
+
+// Main Content - Flex to fill remaining space
+.signup-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 24px;
+  overflow: hidden;
+}
+
+.step-content {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  animation: fadeSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ===== INTRO STEP - Compact =====
+.intro-step {
+  text-align: center;
+  max-width: 400px;
+}
+
+.intro-brands {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: nowrap;
+}
+
+.brand-product {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.product-logo {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #e05a20 0%, #ff7a3d 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  box-shadow: 0 3px 8px rgba(224, 90, 32, 0.3);
+  flex-shrink: 0;
+}
+
+.product-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.brand-connector {
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-connector svg {
+  width: 20px;
+  height: 20px;
+}
+
+.brand-sso {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.sso-logo {
+  width: 48px;
+  height: 48px;
+  background: var(--primary);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(79, 70, 229, 0.3);
+  flex-shrink: 0;
+}
+
+.sso-logo svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.sso-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.intro-content {
+  margin-bottom: 20px;
+}
+
+.intro-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.intro-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.intro-subtitle strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.intro-features {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  padding: 8px 12px;
+  background: var(--bg-subtle);
+  border-radius: 8px;
+}
+
+.feature-item svg {
+  width: 16px;
+  height: 16px;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.feature-item span {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.intro-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.intro-footer {
+  text-align: center;
+  margin-top: 4px;
+}
+
+.intro-footer span {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.intro-footer a {
+  margin-left: 4px;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.intro-footer a:hover {
+  text-decoration: underline;
+}
+
+// ===== FORM STEPS - Compact =====
+.step-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.step-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+
+.step-subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 400;
+}
+
+.step-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.input-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.input-field {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  background: var(--bg-subtle);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  font-size: 15px;
+  color: var(--text);
+  transition: all 0.2s ease;
+}
+
+.input-field::placeholder {
+  color: var(--text-muted);
+}
+
+.input-field:hover {
+  border-color: var(--border);
+  background: var(--bg);
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--bg);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.input-field.error {
+  border-color: var(--error);
+  background: rgba(239, 68, 68, 0.02);
+}
+
+.input-field.error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.input-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.input-error {
+  font-size: 12px;
+  color: var(--error);
+  margin: 0;
+  font-weight: 500;
+}
+
+// Password
+.password-wrapper {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.password-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.password-toggle:hover {
+  background: var(--border-light);
+  color: var(--text-secondary);
+}
+
+// Password Strength - Compact
+.password-strength {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.strength-bars {
+  display: flex;
+  gap: 3px;
+  flex: 1;
+}
+
+.strength-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.strength-bar.active:nth-child(1) {
+  background: var(--error);
+}
+
+.strength-bar.active:nth-child(2) {
+  background: var(--warning);
+}
+
+.strength-bar.active:nth-child(3) {
+  background: #3B82F6;
+}
+
+.strength-bar.active:nth-child(4) {
+  background: var(--success);
+}
+
+.strength-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  min-width: 60px;
+  text-align: right;
+}
+
+// Terms - Compact
+.terms-group {
+  margin-top: 4px;
+}
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.checkbox-input {
+  position: absolute;
+  opacity: 0;
+}
+
+.checkbox-check {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  margin-top: 0;
+  border: 2px solid var(--border);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.checkbox-check svg {
+  width: 12px;
+  height: 12px;
+  color: white;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.15s ease;
+}
+
+.checkbox-input:checked+.checkbox-check {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.checkbox-input:checked+.checkbox-check svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.checkbox-input:focus+.checkbox-check {
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.checkbox-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.checkbox-text a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.checkbox-text a:hover {
+  text-decoration: underline;
+}
+
+// Buttons - Compact
+.btn-primary {
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--primary);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary.loading {
+  cursor: wait;
+}
+
+.btn-primary .btn-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.btn-secondary {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 20px;
+  background: transparent;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  border-color: var(--text-secondary);
+  color: var(--text);
+}
+
+.btn-secondary .btn-icon-left {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-group .btn-secondary {
+  flex: 0 0 auto;
+}
+
+.btn-group .btn-primary {
+  flex: 1;
+}
+
+// Spinner - Small
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Step Footer - Compact
+.step-footer {
+  text-align: center;
+  margin-top: 4px;
+}
+
+.step-footer span {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.step-footer a {
+  margin-left: 4px;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.step-footer a:hover {
+  text-decoration: underline;
+}
+
+// Footer - Compact
+.signup-footer {
+  flex-shrink: 0;
+  padding: 16px;
+  text-align: center;
+  border-top: 1px solid var(--border-light);
+}
+
+.signup-footer p {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.signup-footer strong {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+// Responsive - Even more compact for small screens
+@media (max-width: 480px) {
+  .progress-container {
+    padding: 12px 20px;
+  }
+
+  .signup-content {
+    padding: 16px 20px;
+  }
+
+  .step-title {
+    font-size: 22px;
+  }
+
+  .step-subtitle {
+    font-size: 14px;
+  }
+
+  .intro-title {
+    font-size: 20px;
+  }
+
+  .intro-subtitle {
+    font-size: 13px;
+  }
+
+  .intro-brands {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .product-logo,
+  .sso-logo {
+    width: 44px;
+    height: 44px;
+  }
+
+  .product-logo {
+    font-size: 18px;
+  }
+
+  .sso-logo svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .intro-features {
+    margin-bottom: 20px;
+    gap: 6px;
+  }
+
+  .feature-item {
+    padding: 8px 10px;
+  }
+
+  .feature-item span {
+    font-size: 12px;
+  }
+
+  .step-header {
+    margin-bottom: 20px;
+  }
+
+  .step-form {
+    gap: 14px;
+  }
+
+  .input-field {
+    height: 44px;
+    font-size: 14px;
+  }
+
+  .btn-group {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .btn-group .btn-secondary,
+  .btn-group .btn-primary {
+    width: 100%;
+    flex: none;
+    height: 44px;
+  }
 }

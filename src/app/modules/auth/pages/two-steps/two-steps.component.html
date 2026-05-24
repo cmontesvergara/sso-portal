@@ -1,92 +1,93 @@
-<form class="my-10 space-y-6" (ngSubmit)="onSubmit()">
-  <!-- Setup Mode: Show QR Code -->
-  @if (showSetup && !isValidating) {
-    <div class="text-center space-y-4">
-      <h2 class="mb-1 text-3xl font-semibold text-foreground">Configura Autenticación de Dos Factores</h2>
-      <p class="text-sm text-muted-foreground">Escanea el código QR con tu aplicación de autenticación</p>
+<div class="signup-fullscreen">
+  <div class="signup-content">
+    <div class="step-content">
+      
+      <!-- Setup Mode: Show QR Code -->
+      @if (showSetup && !isValidating) {
+        <div class="step-header">
+          <h1 class="step-title">Configura Autenticación de Dos Factores</h1>
+          <p class="step-subtitle">Escanea el código QR con tu aplicación de autenticación</p>
+        </div>
 
-      <!-- QR Code -->
-      <div class="flex justify-center my-6">
-        <img [src]="qrCode" alt="QR Code" class="w-48 h-48 border border-border rounded-lg" />
+        <!-- QR Code -->
+        <div class="qr-container" style="display: flex; justify-content: center; margin: 24px 0;">
+          <img [src]="qrCode" alt="QR Code" class="qr-code" />
+        </div>
+
+        <!-- Secret Key (manual entry) -->
+        <div class="secret-key-container">
+          <p class="secret-label">O ingresa esta clave manualmente:</p>
+          <code class="secret-key">{{ secret }}</code>
+        </div>
+
+        <!-- Backup Codes -->
+        <div class="backup-codes-container">
+          <p class="backup-title">Códigos de respaldo:</p>
+          <p class="backup-description">Guarda estos códigos en un lugar seguro. Cada uno solo puede usarse una vez.</p>
+          <div class="backup-codes-grid">
+            @for (code of backupCodes; track $index) {
+              <code class="backup-code">{{ code }}</code>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Validation Mode or Setup Verification -->
+      <div class="step-header">
+        @if (isValidating) {
+          <h1 class="step-title">Verificación de Dos Pasos</h1>
+          <p class="step-subtitle">Ingresa el código de tu aplicación de autenticación</p>
+        } @else if (showSetup) {
+          <h1 class="step-title">Verifica tu Código</h1>
+          <p class="step-subtitle">Ingresa el código de 6 dígitos de tu aplicación</p>
+        }
       </div>
 
-      <!-- Secret Key (manual entry) -->
-      <div class="bg-muted p-4 rounded-lg">
-        <p class="text-xs text-muted-foreground mb-2">O ingresa esta clave manualmente:</p>
-        <code class="text-sm font-mono">{{ secret }}</code>
-      </div>
+      @if (!showSetup && !isValidating && isLoading) {
+        <div class="loading-state">
+          <div class="spinner-large"></div>
+          <p class="loading-text">Generando código QR...</p>
+        </div>
+      }
 
-      <!-- Backup Codes -->
-      <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 text-left">
-        <p class="text-sm font-semibold mb-2">Códigos de respaldo:</p>
-        <p class="text-xs text-muted-foreground mb-3">Guarda estos códigos en un lugar seguro. Cada uno solo puede usarse una vez.</p>
-        <div class="grid grid-cols-2 gap-2">
-          @for (code of backupCodes; track $index) {
-            <code class="text-xs font-mono bg-background px-2 py-1 rounded">{{ code }}</code>
+      <!-- OTP Input Grid -->
+      @if (showSetup || isValidating) {
+        <div class="otp-grid">
+          @for (item of inputs; track $index) {
+            <input
+              type="text"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              maxlength="1"
+              (input)="onOtpChange($index, $event)"
+              (keydown)="onOtpKeydown($index, $event)"
+              class="otp-input"
+              placeholder=""
+            />
           }
         </div>
-      </div>
-    </div>
-  }
 
-  <!-- Validation Mode or Setup Verification -->
-  <div class="text-center">
-    @if (isValidating) {
-      <h2 class="mb-1 text-3xl font-semibold text-foreground">Verificación de Dos Pasos</h2>
-      <p class="text-sm text-muted-foreground">Ingresa el código de tu aplicación de autenticación</p>
-    } @else if (showSetup) {
-      <h2 class="mb-1 text-3xl font-semibold text-foreground">Verifica tu Código</h2>
-      <p class="text-sm text-muted-foreground">Ingresa el código de 6 dígitos de tu aplicación</p>
-    }
-  </div>
+        <!-- Submit Button -->
+        <button 
+          type="submit" 
+          class="btn-primary" 
+          [disabled]="isLoading || otpCode.length !== 6"
+          (click)="onSubmit()">
+          {{ isLoading ? 'Verificando...' : (isValidating ? 'Verificar' : 'Activar 2FA') }}
+        </button>
 
-  @if (!showSetup && !isValidating && isLoading) {
-    <div class="text-center">
-      <div class="flex justify-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-      <p class="text-sm text-muted-foreground mt-4">Generando código QR...</p>
-    </div>
-  }
-
-  <!-- OTP Input Grid -->
-  @if (showSetup || isValidating) {
-    <div class="grid grid-cols-6 gap-2">
-      @for (item of inputs; track $index) {
-        <input
-          type="text"
-          inputmode="numeric"
-          pattern="[0-9]*"
-          maxlength="1"
-          (input)="onOtpChange($index, $event)"
-          (keydown)="onOtpKeydown($index, $event)"
-          class="otp-input h-12 w-12 rounded-md border border-border bg-background text-center text-foreground text-lg font-semibold outline-none focus:border-primary sm:h-14 sm:w-14"
-          placeholder=""
-        />
+        <!-- Back to login -->
+        @if (!isValidating) {
+          <div class="step-footer">
+            <a routerLink="/auth/sign-in">Volver a iniciar sesión</a>
+          </div>
+        }
       }
     </div>
+  </div>
 
-    <!-- Submit Button -->
-    <div>
-      <app-button
-        type="submit"
-        full
-        impact="bold"
-        tone="primary"
-        shape="rounded"
-        size="medium"
-        [disabled]="isLoading || otpCode.length !== 6">
-        {{ isLoading ? 'Verificando...' : (isValidating ? 'Verificar' : 'Activar 2FA') }}
-      </app-button>
-    </div>
-
-    <!-- Back to login -->
-    @if (!isValidating) {
-      <div class="text-center">
-        <a routerLink="/auth/sign-in" class="text-sm text-primary hover:underline">
-          Volver a iniciar sesión
-        </a>
-      </div>
-    }
-  }
-</form>
+  <!-- Footer -->
+  <div class="signup-footer">
+    <p>Powered by <strong>Bigso Labs</strong> — La plataforma para tu negocio</p>
+  </div>
+</div>

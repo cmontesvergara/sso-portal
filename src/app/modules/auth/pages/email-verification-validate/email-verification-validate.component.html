@@ -1,101 +1,90 @@
-<div class="flex items-center justify-center min-h-screen bg-background">
-  <div class="w-full max-w-md p-8">
-
-    <!-- Loading State -->
-    @if (isLoading) {
-      <div class="text-center space-y-6">
-        <div class="flex justify-center">
-          <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
+<div class="signup-fullscreen">
+  <div class="signup-content">
+    <div class="step-content">
+      
+      <!-- Loading State -->
+      @if (isLoading) {
+        <div class="loading-state">
+          <div class="spinner-large"></div>
+          <h2 class="loading-title">Verificando tu correo electrónico...</h2>
+          <p class="loading-text">Por favor espera un momento</p>
         </div>
-        <h2 class="text-2xl font-semibold text-foreground">Verificando tu correo electrónico...</h2>
-        <p class="text-muted-foreground">Por favor espera un momento</p>
-      </div>
-    }
+      }
 
-    <!-- Success State -->
-    @if (!isLoading && isSuccess) {
-      <div class="text-center space-y-6">
-        <div class="flex justify-center">
-          <div class="rounded-full bg-green-100 dark:bg-green-900 p-6">
-            <svg class="w-16 h-16 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
+      <!-- Success State -->
+      @if (!isLoading && isSuccess) {
+        <div class="success-state">
+          <div class="success-icon-wrapper">
+            <div class="success-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
           </div>
-        </div>
+          
+          <h2 class="success-title">¡Correo Verificado!</h2>
+          <p class="success-subtitle">Tu correo electrónico ha sido verificado exitosamente.</p>
 
-        <div class="space-y-3">
-          <h2 class="text-3xl font-bold text-foreground">¡Correo Verificado!</h2>
-          <p class="text-lg text-muted-foreground">Tu correo electrónico ha sido verificado exitosamente.</p>
-        </div>
-
-        <div class="bg-primary/10 border border-primary/20 rounded-lg p-4">
-          <h3 class="text-xl font-semibold text-foreground mb-2">¡Bienvenido a BigSO!</h3>
-          <p class="text-sm text-muted-foreground">
-            Ahora puedes acceder a todos los servicios de nuestra plataforma.
-          </p>
-        </div>
-
-        <div class="text-muted-foreground">
-          <p class="text-sm">Serás redirigido al inicio de sesión en</p>
-          <p class="text-4xl font-bold text-primary mt-2">{{ countdown }}</p>
-          <p class="text-sm mt-1">segundos</p>
-        </div>
-
-        <div class="space-y-2">
-          <app-button
-            (click)="redirectNow()"
-            full
-            impact="bold"
-            tone="primary"
-            shape="rounded"
-            size="medium">
-            Ir al inicio de sesión ahora
-          </app-button>
-        </div>
-      </div>
-    }
-
-    <!-- Error State -->
-    @if (!isLoading && !isSuccess) {
-      <div class="text-center space-y-6">
-        <div class="flex justify-center">
-          <div class="rounded-full bg-red-100 dark:bg-red-900 p-6">
-            <svg class="w-16 h-16 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
+          <div class="info-card">
+            <h3 class="info-title">¡Bienvenido a BigSO!</h3>
+            <p class="info-text">Ahora puedes acceder a todos los servicios de nuestra plataforma.</p>
           </div>
-        </div>
 
-        <div class="space-y-3">
-          <h2 class="text-3xl font-bold text-foreground">Error de Verificación</h2>
-          <p class="text-lg text-red-600 dark:text-red-400">{{ errorMessage }}</p>
-        </div>
+          <div class="countdown-container">
+            <p class="countdown-label">Serás redirigido al inicio de sesión en</p>
+            <p class="countdown-number">{{ countdown }}</p>
+            <p class="countdown-text">segundos</p>
+          </div>
 
-        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-          <p class="text-sm text-muted-foreground">
-            Si necesitas un nuevo enlace de verificación, por favor contacta al soporte o intenta registrarte nuevamente.
-          </p>
-        </div>
-
-        <div class="text-muted-foreground">
-          <p class="text-sm">Serás redirigido al inicio de sesión en</p>
-          <p class="text-4xl font-bold text-primary mt-2">{{ countdown }}</p>
-          <p class="text-sm mt-1">segundos</p>
-        </div>
-
-        <div class="space-y-2">
-          <app-button
-            (click)="redirectNow()"
-            full
-            impact="bold"
-            tone="primary"
-            shape="rounded"
-            size="medium">
+          <button 
+            type="button" 
+            class="btn-primary" 
+            (click)="redirectNow()">
             Ir al inicio de sesión ahora
-          </app-button>
+          </button>
         </div>
-      </div>
-    }
+      }
 
+      <!-- Error State -->
+      @if (!isLoading && !isSuccess) {
+        <div class="error-state">
+          <div class="error-icon-wrapper">
+            <div class="error-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </div>
+          </div>
+          
+          <h2 class="error-title">Error de Verificación</h2>
+          <p class="error-message">{{ errorMessage }}</p>
+
+          <div class="warning-card">
+            <p class="warning-text">
+              Si necesitas un nuevo enlace de verificación, por favor contacta al soporte o intenta registrarte nuevamente.
+            </p>
+          </div>
+
+          <div class="countdown-container">
+            <p class="countdown-label">Serás redirigido al inicio de sesión en</p>
+            <p class="countdown-number">{{ countdown }}</p>
+            <p class="countdown-text">segundos</p>
+          </div>
+
+          <button 
+            type="button" 
+            class="btn-primary" 
+            (click)="redirectNow()">
+            Ir al inicio de sesión ahora
+          </button>
+        </div>
+      }
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="signup-footer">
+    <p>Powered by <strong>Bigso Labs</strong> — La plataforma para tu negocio</p>
   </div>
 </div>
