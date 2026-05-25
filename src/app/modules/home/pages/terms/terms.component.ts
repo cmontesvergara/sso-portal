@@ -8,5 +8,7 @@ import { Component } from '@angular/core';
   styleUrl: './terms.component.scss'
 })
 export class TermsComponent {
-
+  printDocument() {
+    window.print();
+  }
 }
