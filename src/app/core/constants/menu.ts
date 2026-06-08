@@ -9,18 +9,6 @@ export class Menu {
       items: [
         {
           hidden: false,
-          icon: 'assets/icons/heroicons/outline/wrench-screwdriver.svg',
-          label: 'Administración',
-          route: '/dashboard',
-          children: [
-            { label: 'Estadísticas', route: '/dashboard/stats', hidden: false },
-            { label: 'Aplicaciones', route: '/dashboard/applications', hidden: false },
-            { label: 'Organizaciones', route: '/dashboard/tenants', hidden: false },
-            { label: 'Usuarios', route: '/dashboard/users', hidden: false },
-          ],
-        },
-        {
-          hidden: false,
           icon: 'assets/icons/heroicons/outline/chart-pie.svg',
           label: 'Dashboard',
           route: '/dashboard',
@@ -110,26 +98,6 @@ export class Menu {
       ],
     },
 
-    {
-      group: 'Administración',
-      separator: true,
-      hidden: true,
-      items: [
-        {
-          hidden: false,
-          icon: 'assets/icons/heroicons/outline/wrench-screwdriver.svg',
-          label: 'Administración',
-          route: '/dashboard',
-          children: [
-            { label: 'Aplicaciones', route: '/dashboard/applications', hidden: false },
-            { label: 'Estadísticas', route: '/dashboard/stats', hidden: false },
-            { label: 'Organizaciones', route: '/dashboard/tenants', hidden: false },
-            { label: 'Roles', route: '/dashboard/roles', hidden: false },
-            { label: 'Usuarios', route: '/dashboard/users', hidden: false },
-          ],
-        },
-      ],
-    },
     {
       group: 'Config',
       separator: false,

@@ -10,14 +10,14 @@ import { ResponsiveHelperComponent } from './shared/components/responsive-helper
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   standalone: true,
-  imports: [NgClass, RouterOutlet, ResponsiveHelperComponent, NgxSonnerToaster,CommonModule],
+  imports: [NgClass, RouterOutlet, ResponsiveHelperComponent, NgxSonnerToaster, CommonModule],
 })
 export class AppComponent {
-  title = 'Administrador';
+  title = 'SSO Portal';
 
   constructor(
     public themeService: ThemeService,
-    public loadingService:LoadingService
+    public loadingService: LoadingService
 
   ) { }
 }

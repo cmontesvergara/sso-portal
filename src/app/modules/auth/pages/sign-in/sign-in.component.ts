@@ -1,6 +1,5 @@
 import { NgClass, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { environment } from 'src/environments/environment';
 import {
   FormBuilder,
   FormGroup,
@@ -10,12 +9,13 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AngularSvgIconModule } from 'angular-svg-icon';
-import { Observable } from 'rxjs';
 import { toast } from 'ngx-sonner';
+import { Observable } from 'rxjs';
 import { AuthService } from 'src/app/core/services/auth/auth.service';
 import { LoadingService } from 'src/app/core/services/loading/loading.service';
 import { LocalStorageService } from 'src/app/core/services/local-storage/local-storage.service';
 import { SessionStorageService } from 'src/app/core/services/session-storage/session-storage.service';
+import { environment } from 'src/environments/environment';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 
 @Component({
@@ -206,7 +206,6 @@ export class SignInComponent implements OnInit {
 
   getAppName(appId: string): string {
     const appNames: Record<string, string> = {
-      'admin': 'Panel Admin',
       'crm': 'CRM',
       'hr': 'Recursos Humanos',
       'analytics': 'Analytics'
@@ -410,12 +409,12 @@ export class SignInComponent implements OnInit {
         });
       }
 
-    // ── Direct login (no SDK) ─────────────────────────────────────────────────
-    // Behaves like the tenant-selector: runs authorize with env defaults and
-    // redirects to the app. /dashboard is deprecated.
+      // ── Direct login (no SDK) ─────────────────────────────────────────────────
+      // Behaves like the tenant-selector: runs authorize with env defaults and
+      // redirects to the app. /dashboard is deprecated.
     } else {
       const tenantId = environment.tenantId;
-      const appId    = environment.appId;
+      const appId = environment.appId;
       const redirectUri = environment.appRedirectUri;
 
       console.log(`[SignIn] Direct login → authorizing with env defaults. tenantId: ${tenantId}, appId: ${appId}`);

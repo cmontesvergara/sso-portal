@@ -44,29 +44,6 @@ export interface Application {
 }
 
 /**
- * Create Application DTO
- */
-export interface CreateApplicationDto {
-  appId: string;
-  name: string;
-  url: string;
-  description?: string;
-  logoUrl?: string;
-  isActive?: boolean;
-}
-
-/**
- * Update Application DTO
- */
-export interface UpdateApplicationDto {
-  name?: string;
-  url?: string;
-  description?: string;
-  logoUrl?: string;
-  isActive?: boolean;
-}
-
-/**
  * User with System Role
  */
 export interface User {
