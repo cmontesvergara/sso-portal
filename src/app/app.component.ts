@@ -1,4 +1,4 @@
-import { CommonModule, NgClass } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NgxSonnerToaster } from 'ngx-sonner';
@@ -10,7 +10,7 @@ import { ResponsiveHelperComponent } from './shared/components/responsive-helper
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   standalone: true,
-  imports: [NgClass, RouterOutlet, ResponsiveHelperComponent, NgxSonnerToaster, CommonModule],
+  imports: [RouterOutlet, ResponsiveHelperComponent, NgxSonnerToaster, CommonModule],
 })
 export class AppComponent {
   title = 'SSO Portal';
