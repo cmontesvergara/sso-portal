@@ -1,8 +1,8 @@
 {
-  "name": "sso-portal",
-  "displayName": "SSO Portal",
+  "name": "idp-web-client",
+  "displayName": "IDP Web Client",
   "version": "0.9.1",
-  "description": "Single Sign-On Portal",
+  "description": "Portal web de autenticación BIGSO",
   "author": "Bigso Team",
   "license": "MIT",
   "scripts": {

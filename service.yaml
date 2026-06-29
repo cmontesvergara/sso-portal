@@ -1,0 +1,15 @@
+name: idp-web-client
+version: 1.0.0
+type: frontend
+owner: iam-team
+description: Portal web de autenticación BIGSO (idp-web-client), expuesto detrás del API Gateway
+ports:
+  internal: 80
+runtime_config:
+  - name: API_BASE_URL
+    description: URL base del API Gateway para idp-core (ej. https://api-staging.bigso.cloud/idp)
+    required: true
+  - name: SENTRY_DSN
+    description: DSN de Sentry
+    required: false
+lifecycle: active
