@@ -2,7 +2,7 @@ name: Deploy IDP Web Client to Staging
 
 on:
   push:
-    branches: [main]
+    branches: [staging]
   workflow_dispatch:
 
 env:
