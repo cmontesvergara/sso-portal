@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from 'src/environments/environment';
 
 interface RuntimeEnv {
     API_BASE_URL?: string;
@@ -33,6 +34,6 @@ export class EnvironmentService {
     }
 
     get apiBaseUrl(): string {
-        return this.get('API_BASE_URL');
+        return this.getOptional('API_BASE_URL') ?? environment.baseUrl;
     }
 }

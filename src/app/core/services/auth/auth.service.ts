@@ -5,6 +5,11 @@ import { environment } from 'src/environments/environment';
 import { SystemRole, TenantWithApps, UserProfile } from '../../models';
 import { SessionStorageService } from '../session-storage/session-storage.service';
 
+function getApiBaseUrl(): string {
+  const runtime = (window as any).env ?? {};
+  return runtime.API_BASE_URL ?? environment.baseUrl;
+}
+
 export { SystemRole, TenantWithApps, UserProfile };
 
 export interface SignInResponse {
@@ -103,10 +108,10 @@ export interface RefreshV2Response {
   providedIn: 'root',
 })
 export class AuthService {
-  baseUrl = environment.baseUrl;
+  baseUrl = getApiBaseUrl();
 
   private get v2BaseUrl(): string {
-    return `${this.baseUrl}/api/v2/auth`;
+    return `${this.baseUrl}/idp/v1/auth`;
   }
 
   constructor(
@@ -124,14 +129,14 @@ export class AuthService {
       : { nuid: emailOrNuid, password };
 
     return this.http.post<SignInResponse>(
-      `${this.baseUrl}/api/v1/auth/signin`,
+      `${this.baseUrl}/idp/v1/auth/signin`,
       payload,
       { withCredentials: true },
     );
   }
 
   signUp(values: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/api/v1/auth/signup`, values, {
+    return this.http.post(`${this.baseUrl}/idp/v1/auth/signup`, values, {
       withCredentials: true,
     });
   }
@@ -151,14 +156,14 @@ export class AuthService {
     nuid?: string;
     phone?: string;
   }): Observable<any> {
-    return this.http.post(`${this.baseUrl}/api/v2/users/register`, values, {
+    return this.http.post(`${this.baseUrl}/idp/v1/users/register`, values, {
       withCredentials: true,
     });
   }
 
   getProfile(): Observable<{ success: boolean; user: UserProfile }> {
     return this.http.get<{ success: boolean; user: UserProfile }>(
-      `${this.baseUrl}/api/v2/user/profile`,
+      `${this.baseUrl}/idp/v1/user/profile`,
       { withCredentials: true },
     );
   }
@@ -170,7 +175,7 @@ export class AuthService {
       success: boolean;
       message: string;
       user: UserProfile;
-    }>(`${this.baseUrl}/api/v1/user/profile`, profileData, {
+    }>(`${this.baseUrl}/idp/v1/user/profile`, profileData, {
       withCredentials: true,
     });
   }
@@ -180,7 +185,7 @@ export class AuthService {
     tenants: TenantWithApps[];
   }> {
     return this.http.get<{ success: boolean; tenants: TenantWithApps[] }>(
-      `${this.baseUrl}/api/v1/user/tenants`,
+      `${this.baseUrl}/idp/v1/user/tenants`,
       { withCredentials: true },
     );
   }
@@ -197,7 +202,7 @@ export class AuthService {
     },
   ): Observable<AuthorizeResponse> {
     return this.http.post<AuthorizeResponse>(
-      `${this.baseUrl}/api/v1/auth/authorize`,
+      `${this.baseUrl}/idp/v1/auth/authorize`,
       { tenantId, appId, redirectUri, ...pkce },
       { withCredentials: true },
     );
@@ -208,7 +213,7 @@ export class AuthService {
    */
   logout(): Observable<any> {
     return this.http
-      .post(`${this.baseUrl}/api/v1/auth/logout`, {}, { withCredentials: true })
+      .post(`${this.baseUrl}/idp/v1/auth/logout`, {}, { withCredentials: true })
       .pipe(
         tap(() => {
           this.sessionStorageService.clearAll();
@@ -218,7 +223,7 @@ export class AuthService {
 
   sendEmailRecovery(email: string): Observable<any> {
     return this.http.post(
-      `${this.baseUrl}/api/v2/auth/forgot-password`,
+      `${this.baseUrl}/idp/v1/auth/forgot-password`,
       { email },
       { withCredentials: true },
     );
@@ -226,7 +231,7 @@ export class AuthService {
 
   validateEmailRecovery(newPassword: string, token: string): Observable<any> {
     return this.http.post(
-      `${this.baseUrl}/api/v2/auth/reset-password`,
+      `${this.baseUrl}/idp/v1/auth/reset-password`,
       { newPassword, token },
       { withCredentials: true },
     );
@@ -234,7 +239,7 @@ export class AuthService {
 
   sendEmailOtpCode(email: string, userId: string): Observable<any> {
     return this.http.post(
-      `${this.baseUrl}/api/v2/users/send-verification`,
+      `${this.baseUrl}/idp/v1/users/send-verification`,
       { email, userId },
       { withCredentials: true },
     );
@@ -242,7 +247,7 @@ export class AuthService {
 
   verifyEmailToken(token: string): Observable<any> {
     return this.http.post(
-      `${this.baseUrl}/api/v2/users/verify-email`,
+      `${this.baseUrl}/idp/v1/users/verify-email`,
       { token },
       { withCredentials: true },
     );
@@ -250,13 +255,13 @@ export class AuthService {
 
   getTenantPublicInfo(tenantId: string): Observable<{ success: boolean; tenant: { name: string; slug: string } }> {
     return this.http.get<{ success: boolean; tenant: { name: string; slug: string } }>(
-      `${this.baseUrl}/api/v2/tenants/${tenantId}/info`
+      `${this.baseUrl}/idp/v1/tenants/${tenantId}/info`
     );
   }
 
   generateOTP(userId: string, name: string): Observable<any> {
     return this.http.post(
-      `${this.baseUrl}/api/v1/otp/generate`,
+      `${this.baseUrl}/idp/v1/otp/generate`,
       { userId, name },
       { withCredentials: true },
     );
@@ -264,7 +269,7 @@ export class AuthService {
 
   verifyOTP(userId: string, token: string): Observable<any> {
     return this.http.post(
-      `${this.baseUrl}/api/v1/otp/verify`,
+      `${this.baseUrl}/idp/v1/otp/verify`,
       { userId, token },
       { withCredentials: true },
     );
@@ -272,14 +277,14 @@ export class AuthService {
 
   validateOTP(tempToken: string, token: string): Observable<any> {
     return this.http.post(
-      `${this.baseUrl}/api/v1/otp/validate`,
+      `${this.baseUrl}/idp/v1/otp/validate`,
       { tempToken, token },
       { withCredentials: true },
     );
   }
 
   checkOTPStatus(userId: string): Observable<any> {
-    return this.http.get(`${this.baseUrl}/api/v1/otp/status/${userId}`, {
+    return this.http.get(`${this.baseUrl}/idp/v1/otp/status/${userId}`, {
       withCredentials: true,
     });
   }

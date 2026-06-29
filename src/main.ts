@@ -5,8 +5,8 @@ import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app/app-routing.module';
 import { AppComponent } from './app/app.component';
-import { ErrorInterceptor } from './app/core/interceptor/error.interceptor';
 import { AuthV2Interceptor } from './app/core/interceptor/auth-v2.interceptor';
+import { ErrorInterceptor } from './app/core/interceptor/error.interceptor';
 import { environment } from './environments/environment';
 
 if (environment.production) {

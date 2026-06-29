@@ -9,20 +9,23 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, Subject, throwError } from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
-import { environment } from 'src/environments/environment';
-import { SessionStorageService } from '../services/session-storage/session-storage.service';
 import { AuthService } from '../services/auth/auth.service';
+import { SessionStorageService } from '../services/session-storage/session-storage.service';
 
 @Injectable()
 export class AuthV2Interceptor implements HttpInterceptor {
   private isRefreshing = false;
   private refreshSubject = new Subject<void>();
 
+  private apiBaseUrl: string;
+
   constructor(
     private readonly router: Router,
     private readonly sessionStorageService: SessionStorageService,
     private readonly authService: AuthService,
-  ) {}
+  ) {
+    this.apiBaseUrl = this.authService.baseUrl;
+  }
 
   intercept(
     req: HttpRequest<any>,
@@ -59,7 +62,7 @@ export class AuthV2Interceptor implements HttpInterceptor {
   }
 
   private isSameOrigin(req: HttpRequest<any>): boolean {
-    return req.url.startsWith(environment.baseUrl);
+    return req.url.startsWith(this.apiBaseUrl);
   }
 
   private handle401Error(
